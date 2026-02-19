@@ -1,0 +1,26 @@
+{
+  "config": {
+    "pantalla": "3",
+    "actualizar_cada": 60
+  },
+  "programacion": [
+    {
+      "horario": "manana",
+      "inicio": "00:00",
+      "fin": "10:29",
+      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_manana.mp4"
+    },
+    {
+      "horario": "mediodia",
+      "inicio": "10:30",
+      "fin": "14:29",
+      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_mediodia.mp4"
+    },
+    {
+      "horario": "tarde",
+      "inicio": "14:30",
+      "fin": "23:59",
+      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_tarde.mp4"
+    }
+  ]
+}
