@@ -11,10 +11,13 @@
 <body>
     <video id="videoPlayer" muted playsinline loop></video>
     <script>
+        // Apunta al bucket exclusivo de Pantalla 3
         const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla-3/playlist_p3.json';
         const videoElement = document.getElementById('videoPlayer');
         let currentUrl = '';
+        let ultimaModificacion = ''; 
 
+        // Zona Horaria UTC-6 (Simplificada al no necesitar días ni meses para P3)
         function obtenerFechaElSalvador() {
             const d = new Date();
             const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
@@ -28,6 +31,7 @@
 
         async function cargarPlaylist() {
             try {
+                // Descarga del JSON con Cache Buster
                 const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime());
                 const data = await response.json();
                 
@@ -36,25 +40,46 @@
                 
                 let videoEncontrado = '';
 
-                // Lógica simple para P3 (Asumiendo que el JSON solo tiene fijos.manana, fijos.mediodia y fijos.tarde)
+                // Horarios operativos P3 (Apunta a las llaves: manana, mediodia, tarde)
                 if (horaActual >= "00:00" && horaActual <= "10:29") {
                     videoEncontrado = data.fijos.manana;
-                } 
-                else if (horaActual >= "10:30" && horaActual <= "14:29") {
+                } else if (horaActual >= "10:30" && horaActual <= "13:59") {
                     videoEncontrado = data.fijos.mediodia; 
-                } 
-                else if (horaActual >= "14:30" && horaActual <= "23:59") {
+                } else if (horaActual >= "14:00" && horaActual <= "23:59") {
                     videoEncontrado = data.fijos.tarde;
                 }
 
-                if (videoEncontrado && videoEncontrado !== currentUrl) {
-                    currentUrl = videoEncontrado;
-                    const cacheBuster = '?update=' + ahora.getTime();
-                    videoElement.src = currentUrl + cacheBuster;
-                    videoElement.load();
-                    videoElement.play().catch(() => {});
+                // Detector de reemplazo de videos en la nube (Petición HEAD)
+                if (videoEncontrado) {
+                    let forzarRecarga = false;
+
+                    if (videoEncontrado !== currentUrl) {
+                        currentUrl = videoEncontrado;
+                        ultimaModificacion = ''; 
+                        forzarRecarga = true;
+                    } else {
+                        try {
+                            const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD' });
+                            const modificado = resHead.headers.get('Last-Modified');
+                            if (modificado) {
+                                if (!ultimaModificacion) {
+                                    ultimaModificacion = modificado;
+                                } else if (ultimaModificacion !== modificado) {
+                                    ultimaModificacion = modificado;
+                                    forzarRecarga = true;
+                                }
+                            }
+                        } catch (e) {} 
+                    }
+
+                    // Forzar recarga visual
+                    if (forzarRecarga) {
+                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
+                        videoElement.load();
+                        videoElement.play().catch(() => {});
+                    }
                 }
-            } catch (error) { console.error("Error P3:", error); }
+            } catch (error) { console.error("Error General:", error); }
         }
 
         setInterval(() => { if(videoElement.paused && videoElement.src) videoElement.play().catch(() => {}); }, 1000);
