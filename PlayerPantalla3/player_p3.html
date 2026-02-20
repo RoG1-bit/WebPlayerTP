@@ -2,58 +2,63 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reproductor P3</title>
+    <title>Reproductor P3 - Típicos Margoth</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
-        #videoPlayer { width: 100%; height: 100%; object-fit: cover; }
-        #mensaje { color: white; position: absolute; top: 10px; left: 10px; font-family: sans-serif; display: none; }
+        video { width: 100%; height: 100%; object-fit: cover; position: absolute; }
     </style>
 </head>
 <body>
-
-    <video id="videoPlayer" autoplay muted playsinline loop></video>
-    <div id="mensaje">Cargando...</div>
-
+    <video id="videoPlayer" muted playsinline loop></video>
     <script>
-        const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/playlist_p3.json';
+        const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla-3/playlist_p3.json';
         const videoElement = document.getElementById('videoPlayer');
         let currentUrl = '';
 
-        async function cargarPlaylist() {
-            try {
-                // 1. Buscamos la "comanda" (el JSON)
-                const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime()); // Evita caché
-                const data = await response.json();
-                
-                // 2. Verificamos qué hora es
-                const ahora = new Date();
-                const horaActual = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
-                
-                // 3. Buscamos el video que toca
-                let videoEncontrado = null;
-                
-                data.programacion.forEach(item => {
-                    if (horaActual >= item.inicio && horaActual <= item.fin) {
-                        videoEncontrado = item.url;
-                    }
-                });
-
-                // 4. Si encontramos video y es diferente al que está sonando, lo cambiamos
-                if (videoEncontrado && videoEncontrado !== currentUrl) {
-                    console.log("Cambiando video a: " + videoEncontrado);
-                    currentUrl = videoEncontrado;
-                    videoElement.src = currentUrl;
-                    videoElement.play().catch(e => console.log("Error al reproducir (necesita interacción):", e));
-                }
-
-            } catch (error) {
-                console.error("Error leyendo playlist:", error);
-            }
+        function obtenerFechaElSalvador() {
+            const d = new Date();
+            const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+            const svTime = new Date(utc - (3600000 * 6)); 
+            return {
+                getHours: () => svTime.getUTCHours(),
+                getMinutes: () => svTime.getUTCMinutes(),
+                getTime: () => d.getTime() 
+            };
         }
 
-        // Revisar el horario cada 30 segundos
+        async function cargarPlaylist() {
+            try {
+                const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime());
+                const data = await response.json();
+                
+                const ahora = obtenerFechaElSalvador();
+                const horaActual = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
+                
+                let videoEncontrado = '';
+
+                // Lógica simple para P3 (Asumiendo que el JSON solo tiene fijos.manana, fijos.mediodia y fijos.tarde)
+                if (horaActual >= "00:00" && horaActual <= "10:29") {
+                    videoEncontrado = data.fijos.manana;
+                } 
+                else if (horaActual >= "10:30" && horaActual <= "14:29") {
+                    videoEncontrado = data.fijos.mediodia; 
+                } 
+                else if (horaActual >= "14:30" && horaActual <= "23:59") {
+                    videoEncontrado = data.fijos.tarde;
+                }
+
+                if (videoEncontrado && videoEncontrado !== currentUrl) {
+                    currentUrl = videoEncontrado;
+                    const cacheBuster = '?update=' + ahora.getTime();
+                    videoElement.src = currentUrl + cacheBuster;
+                    videoElement.load();
+                    videoElement.play().catch(() => {});
+                }
+            } catch (error) { console.error("Error P3:", error); }
+        }
+
+        setInterval(() => { if(videoElement.paused && videoElement.src) videoElement.play().catch(() => {}); }, 1000);
         setInterval(cargarPlaylist, 30000);
-        // Cargar al iniciar
         cargarPlaylist();
     </script>
 </body>
