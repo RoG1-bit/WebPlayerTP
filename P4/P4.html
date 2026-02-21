@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reproductor P2 - Típicos Margoth</title>
+    <title>Reproductor P3 - Típicos Margoth</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: cover; position: absolute; }
@@ -11,23 +11,15 @@
 <body>
     <video id="videoPlayer" muted playsinline loop></video>
     <script>
-        const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla2/playlist_p2.json';
+        const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/P4/playlist_p4.json';
         const videoElement = document.getElementById('videoPlayer');
         let currentUrl = ''; 
         let ultimaModificacion = ''; 
 
+        // HOTFIX: Motor de Zona Horaria Infalible
         function obtenerFechaElSalvador() {
             const svString = new Date().toLocaleString("en-US", {timeZone: "America/El_Salvador"});
             return new Date(svString);
-        }
-
-        function obtenerTipoSemana() {
-            const ahora = obtenerFechaElSalvador();
-            const fechaBase = new Date(2026, 1, 9); 
-            const ahoraLimpiado = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-            const diferenciaMs = ahoraLimpiado - fechaBase;
-            const semanasPasadas = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24 * 7));
-            return (semanasPasadas % 2 === 0) ? "S1" : "S2";
         }
 
         async function cargarPlaylist() {
@@ -38,28 +30,27 @@
                 const ahora = obtenerFechaElSalvador();
                 const horaActual = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
                 
-                let dia = ahora.getDay();
-                if(dia === 0) dia = 7; 
-
-                const tipoSemana = obtenerTipoSemana();
                 let videoEncontrado = '';
 
-                if (horaActual >= "00:00" && horaActual <= "10:29") {
-                    videoEncontrado = data.fijos.manana;
-                } else if (horaActual >= "10:30" && horaActual <= "13:59") {
-                    videoEncontrado = (tipoSemana === "S1") ? data.almuerzos_s1[dia] : data.almuerzos_s2[dia];
-                } else if (horaActual >= "14:00" && horaActual <= "23:59") {
-                    videoEncontrado = data.fijos.tarde;
+                // NUEVO MOTOR DE HORARIOS INTELIGENTE: Lee directo del JSON
+                if (data && data.programacion) {
+                    for (let i = 0; i < data.programacion.length; i++) {
+                        let turno = data.programacion[i];
+                        // Compara la hora actual con el "inicio" y "fin" declarados en el JSON
+                        if (horaActual >= turno.inicio && horaActual <= turno.fin) {
+                            videoEncontrado = turno.url;
+                            break; // Se detiene al encontrar el horario correcto
+                        }
+                    }
                 }
 
                 if (videoEncontrado) {
-                    if (currentUrl === '') {
+                    let forzarRecarga = false;
+
+                    if (videoEncontrado !== currentUrl) {
                         currentUrl = videoEncontrado;
-                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
-                        videoElement.load();
-                        videoElement.play().catch(() => {});
-                    } else if (videoEncontrado !== currentUrl) {
-                        window.location.href = window.location.href.split('?')[0] + '?refresh=' + new Date().getTime();
+                        ultimaModificacion = ''; 
+                        forzarRecarga = true;
                     } else {
                         try {
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD' });
@@ -68,13 +59,20 @@
                                 if (!ultimaModificacion) {
                                     ultimaModificacion = modificado;
                                 } else if (ultimaModificacion !== modificado) {
-                                    window.location.href = window.location.href.split('?')[0] + '?refresh=' + new Date().getTime();
+                                    ultimaModificacion = modificado;
+                                    forzarRecarga = true;
                                 }
                             }
                         } catch (e) {} 
                     }
+
+                    if (forzarRecarga) {
+                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
+                        videoElement.load();
+                        videoElement.play().catch(() => {});
+                    }
                 }
-            } catch (error) { console.error("Error P2:", error); }
+            } catch (error) { console.error("Error General:", error); }
         }
 
         setInterval(() => { if(videoElement.paused && videoElement.src) videoElement.play().catch(() => {}); }, 1000);
