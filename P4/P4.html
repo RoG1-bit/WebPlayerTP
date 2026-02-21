@@ -45,12 +45,13 @@
                 }
 
                 if (videoEncontrado) {
-                    let forzarRecarga = false;
-
-                    if (videoEncontrado !== currentUrl) {
+                    if (currentUrl === '') {
                         currentUrl = videoEncontrado;
-                        ultimaModificacion = ''; 
-                        forzarRecarga = true;
+                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
+                        videoElement.load();
+                        videoElement.play().catch(() => {});
+                    } else if (videoEncontrado !== currentUrl) {
+                        window.location.href = window.location.href.split('?')[0] + '?refresh=' + new Date().getTime();
                     } else {
                         try {
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD' });
@@ -59,17 +60,10 @@
                                 if (!ultimaModificacion) {
                                     ultimaModificacion = modificado;
                                 } else if (ultimaModificacion !== modificado) {
-                                    ultimaModificacion = modificado;
-                                    forzarRecarga = true;
+                                    window.location.href = window.location.href.split('?')[0] + '?refresh=' + new Date().getTime();
                                 }
                             }
                         } catch (e) {} 
-                    }
-
-                    if (forzarRecarga) {
-                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
-                        videoElement.load();
-                        videoElement.play().catch(() => {});
                     }
                 }
             } catch (error) { console.error("Error General:", error); }

@@ -9,12 +9,36 @@
     </style>
 </head>
 <body>
+    <div id="botonIniciar" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: rgba(255,0,0,0.8); color: white; padding: 20px 40px; font-size: 24px; border-radius: 10px; cursor: pointer; font-family: sans-serif;">
+        Tocar para iniciar video
+    </div>
     <video id="videoPlayer" muted playsinline loop></video>
     <script>
         const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla2/playlist_p2.json';
         const videoElement = document.getElementById('videoPlayer');
+        const botonIniciar = document.getElementById('botonIniciar');
         let currentUrl = ''; 
         let ultimaModificacion = ''; 
+
+        function intentarReproducir() {
+            videoElement.play().then(() => {
+                botonIniciar.style.display = 'none';
+            }).catch((error) => {
+                console.error("El navegador bloqueó el Autoplay:", error);
+                botonIniciar.style.display = 'block';
+            });
+        }
+
+        botonIniciar.addEventListener('click', intentarReproducir);
+
+        function recargarPaginaSegura() {
+            videoElement.pause();
+            videoElement.removeAttribute('src');
+            videoElement.load();
+            setTimeout(() => {
+                window.location.href = window.location.href.split('?')[0] + '?refresh=' + new Date().getTime();
+            }, 500);
+        }
 
         function obtenerFechaElSalvador() {
             const svString = new Date().toLocaleString("en-US", {timeZone: "America/El_Salvador"});
@@ -23,16 +47,32 @@
 
         function obtenerTipoSemana() {
             const ahora = obtenerFechaElSalvador();
-            const fechaBase = new Date(2026, 1, 9); 
-            const ahoraLimpiado = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-            const diferenciaMs = ahoraLimpiado - fechaBase;
+            
+            const diaSemana = ahora.getDay(); 
+            const diasParaRestar = diaSemana === 0 ? 6 : diaSemana - 1;
+            
+            const lunesActual = new Date(ahora);
+            lunesActual.setDate(ahora.getDate() - diasParaRestar);
+            lunesActual.setHours(0, 0, 0, 0);
+
+            const fechaBaseUTC = Date.UTC(2026, 1, 9); 
+            const lunesActualUTC = Date.UTC(lunesActual.getFullYear(), lunesActual.getMonth(), lunesActual.getDate());
+
+            const diferenciaMs = lunesActualUTC - fechaBaseUTC;
             const semanasPasadas = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24 * 7));
+            
             return (semanasPasadas % 2 === 0) ? "S1" : "S2";
         }
 
         async function cargarPlaylist() {
             try {
                 const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime());
+                
+                if (!response.ok) {
+                    console.warn("No se pudo cargar el JSON. Código HTTP:", response.status);
+                    return;
+                }
+
                 const data = await response.json();
                 
                 const ahora = obtenerFechaElSalvador();
@@ -57,27 +97,31 @@
                         currentUrl = videoEncontrado;
                         videoElement.src = currentUrl + '?update=' + new Date().getTime();
                         videoElement.load();
-                        videoElement.play().catch(() => {});
+                        intentarReproducir();
                     } else if (videoEncontrado !== currentUrl) {
-                        window.location.href = window.location.href.split('?')[0] + '?refresh=' + new Date().getTime();
+                        recargarPaginaSegura();
                     } else {
                         try {
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD' });
-                            const modificado = resHead.headers.get('Last-Modified');
-                            if (modificado) {
-                                if (!ultimaModificacion) {
-                                    ultimaModificacion = modificado;
-                                } else if (ultimaModificacion !== modificado) {
-                                    window.location.href = window.location.href.split('?')[0] + '?refresh=' + new Date().getTime();
+                            if (resHead.ok) {
+                                const modificado = resHead.headers.get('Last-Modified');
+                                if (modificado) {
+                                    if (!ultimaModificacion) {
+                                        ultimaModificacion = modificado;
+                                    } else if (ultimaModificacion !== modificado) {
+                                        recargarPaginaSegura();
+                                    }
                                 }
                             }
-                        } catch (e) {} 
+                        } catch (e) {
+                            console.warn("Fallo de red al comprobar actualización del video. Reintentando en el próximo ciclo.");
+                        } 
                     }
                 }
             } catch (error) { console.error("Error P2:", error); }
         }
 
-        setInterval(() => { if(videoElement.paused && videoElement.src) videoElement.play().catch(() => {}); }, 1000);
+        setInterval(() => { if(videoElement.paused && videoElement.src) intentarReproducir(); }, 1000);
         setInterval(cargarPlaylist, 30000);
         cargarPlaylist();
     </script>
