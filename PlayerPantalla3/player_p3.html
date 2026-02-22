@@ -13,26 +13,32 @@
         Tocar para iniciar video
     </div>
     <video id="videoPlayer" muted playsinline loop></video>
+    
     <script>
         const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/playlist_p3.json';
         const videoElement = document.getElementById('videoPlayer');
         const botonIniciar = document.getElementById('botonIniciar');
         let currentUrl = ''; 
         let ultimaModificacion = ''; 
+        let intentandoReproducir = false; 
 
         function intentarReproducir() {
+            if (intentandoReproducir) return;
+            intentandoReproducir = true;
+            
             videoElement.play().then(() => {
                 botonIniciar.style.display = 'none';
+                intentandoReproducir = false;
             }).catch((error) => {
-                console.error("El navegador bloqueó el Autoplay:", error);
                 botonIniciar.style.display = 'block';
+                intentandoReproducir = false;
             });
         }
-
         botonIniciar.addEventListener('click', intentarReproducir);
 
         function recargarPaginaSegura() {
             videoElement.pause();
+            videoElement.src = ''; 
             videoElement.removeAttribute('src');
             videoElement.load();
             setTimeout(() => {
@@ -40,28 +46,80 @@
             }, 500);
         }
 
-        function obtenerFechaElSalvador() {
-            const svString = new Date().toLocaleString("en-US", {timeZone: "America/El_Salvador"});
-            return new Date(svString);
+        function fetchSeguro(url, timeoutMs = 3000) {
+            return Promise.race([
+                fetch(url, { cache: 'no-store' }),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout de red")), timeoutMs))
+            ]);
+        }
+
+        async function obtenerFechaReal() {
+            try {
+                const res1 = await fetchSeguro('https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador');
+                if (res1.ok) {
+                    const data = await res1.json();
+                    const dias = {"Sunday":0, "Monday":1, "Tuesday":2, "Wednesday":3, "Thursday":4, "Friday":5, "Saturday":6};
+                    return {
+                        getFullYear: () => data.year,
+                        getMonth: () => data.month - 1, 
+                        getDate: () => data.day,
+                        getDay: () => dias[data.dayOfWeek],
+                        getHours: () => data.hour,
+                        getMinutes: () => data.minute
+                    };
+                }
+                throw new Error("Plan A falló");
+            } catch (error1) {
+                try {
+                    const res2 = await fetchSeguro('https://worldtimeapi.org/api/timezone/America/El_Salvador');
+                    if (res2.ok) {
+                        const data2 = await res2.json();
+                        const svTime = new Date((data2.unixtime * 1000) - (6 * 3600000));
+                        return {
+                            getFullYear: () => svTime.getUTCFullYear(),
+                            getMonth: () => svTime.getUTCMonth(),
+                            getDate: () => svTime.getUTCDate(),
+                            getDay: () => svTime.getUTCDay(),
+                            getHours: () => svTime.getUTCHours(),
+                            getMinutes: () => svTime.getUTCMinutes()
+                        };
+                    }
+                    throw new Error("Plan B falló");
+                } catch (error2) {
+                    console.warn("Modo Offline: Usando reloj de hardware");
+                    const d = new Date();
+                    const svTime = new Date(d.getTime() - (6 * 3600000));
+                    return {
+                        getFullYear: () => svTime.getUTCFullYear(),
+                        getMonth: () => svTime.getUTCMonth(),
+                        getDate: () => svTime.getUTCDate(),
+                        getDay: () => svTime.getUTCDay(),
+                        getHours: () => svTime.getUTCHours(),
+                        getMinutes: () => svTime.getUTCMinutes()
+                    };
+                }
+            }
         }
 
         async function cargarPlaylist() {
             try {
-                const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime());
+                const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime(), { cache: 'no-store' });
+                if (!response.ok) return; 
                 
-                if (!response.ok) {
-                    console.warn("No se pudo cargar el JSON. Código HTTP:", response.status);
-                    return;
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    console.error("JSON corrupto detectado. Manteniendo video actual.");
+                    return; 
                 }
-
-                const data = await response.json();
                 
-                const ahora = obtenerFechaElSalvador();
+                const ahora = await obtenerFechaReal();
                 const horaActual = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
                 
                 let videoEncontrado = '';
 
-                // Lógica Dinámica P3: Busca automáticamente en la lista "programacion" de tu JSON
+                // LÓGICA DINÁMICA DE HORARIOS P3
                 if (data && data.programacion) {
                     for (let i = 0; i < data.programacion.length; i++) {
                         let turno = data.programacion[i];
@@ -82,7 +140,7 @@
                         recargarPaginaSegura();
                     } else {
                         try {
-                            const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD' });
+                            const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD', cache: 'no-store' });
                             if (resHead.ok) {
                                 const modificado = resHead.headers.get('Last-Modified');
                                 if (modificado) {
@@ -93,16 +151,22 @@
                                     }
                                 }
                             }
-                        } catch (e) {
-                            console.warn("Fallo de red al comprobar actualización del video. Reintentando en el próximo ciclo.");
-                        } 
+                        } catch (e) {} 
                     }
                 }
-            } catch (error) { console.error("Error P3:", error); }
+            } catch (error) { 
+                console.error("Error General P3:", error); 
+            } finally {
+                setTimeout(cargarPlaylist, 30000);
+            }
         }
 
-        setInterval(() => { if(videoElement.paused && videoElement.src) intentarReproducir(); }, 1000);
-        setInterval(cargarPlaylist, 30000);
+        setInterval(() => { 
+            if(videoElement.paused && videoElement.src && botonIniciar.style.display === 'none') {
+                intentarReproducir(); 
+            }
+        }, 5000); 
+
         cargarPlaylist();
     </script>
 </body>

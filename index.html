@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-width=1.0">
+    <title>Portal Margoth TV</title>
+    <style>
+        /* Reseteo básico y tipografía limpia */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #292929 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Contenedor Principal */
+        .panel-central {
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Encabezados */
+        h1 {
+            color: #ff9800; /* Naranja Institucional */
+            font-size: 3.5rem;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        h2 {
+            color: #aaaaaa;
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+        }
+
+        /* Cuadrícula de Botones (Ideal para control remoto) */
+        .menu-botones {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Diseño del Botón */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 2.2rem;
+            font-weight: 600;
+            padding: 20px 30px;
+            border-radius: 15px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Iconos dentro del botón */
+        .btn span.icono {
+            margin-right: 20px;
+            font-size: 2.8rem;
+        }
+
+        /* ========================================================
+           LA MAGIA DEL CONTROL REMOTO (:focus)
+           Esto hace que brille cuando pasen por encima con la TV
+           ======================================================== */
+        .btn:hover, .btn:focus {
+            background: #ff9800;
+            color: #000000;
+            border-color: #ffffff;
+            outline: none; /* Quita el borde azul feo de las TVs */
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 15px 25px rgba(255, 152, 0, 0.4);
+            z-index: 10;
+        }
+
+        /* Botón especial de promociones */
+        .btn-promo:hover, .btn-promo:focus {
+            background: #e53935; /* Rojo vibrante */
+            box-shadow: 0 15px 25px rgba(229, 57, 53, 0.4);
+        }
+
+        /* Pie de página para IT */
+        .footer-it {
+            margin-top: 30px;
+            font-size: 1rem;
+            color: #666666;
+        }
+
+        /* Animación de entrada */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="panel-central">
+        <h1>Típicos Margoth</h1>
+        <h2>Sistema de Cartelería Digital v2.0</h2>
+
+        <div class="menu-botones">
+            <a href="https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/player_p1.html?v=1" class="btn">
+                <span class="icono">🍲</span> Pantalla 1 - Menú Principal
+            </a>
+            
+            <a href="https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla2/player_p2.html?v=1" class="btn">
+                <span class="icono">🥤</span> Pantalla 2 - Acompañamientos
+            </a>
+            
+            <a href="https://project-cast.sfo3.cdn.digitaloceanspaces.com/player_p3.html?v=1" class="btn">
+                <span class="icono">📢</span> Pantalla 3 - Publicidad General
+            </a>
+
+            </div>
+
+        <div class="footer-it">
+            Soporte IT - Seleccione la pantalla asignada a este televisor usando las flechas del control.
+        </div>
+    </div>
+
+</body>
+</html>
