@@ -199,6 +199,11 @@
 
         // Arranque inicial
         cargarPlaylist();
+
+        // limpieza de memoria cada 5 minutos (previene fugas en TVs viejas)
+        setInterval(() => {
+            window.location.reload(true); // Recarga completa para limpiar memoria, pero solo cada 2 horas para no molestar
+        }, 7200000);
     </script>
 </body>
 </html>
