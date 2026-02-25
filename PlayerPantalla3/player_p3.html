@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reproductor Optimizado P3</title>
+    <title>Reproductor Optimizado P3 - FIX</title>
     <style>
       body,
       html {
@@ -116,7 +116,13 @@
             }
             throw new Error("API 2 falló");
           } catch (error2) {
-            throw new Error("Sin internet.");
+            // PLAN C: Si no hay red al arrancar, usa el reloj local de la TV para evitar pantalla negra
+            console.warn("Sin APIs de tiempo. Usando reloj local.");
+            const localDate = new Date();
+            return {
+              getHours: () => localDate.getHours(),
+              getMinutes: () => localDate.getMinutes(),
+            };
           }
         }
       }
@@ -156,7 +162,8 @@
           if (videoEncontrado) {
             if (currentUrl === "") {
               currentUrl = videoEncontrado;
-              videoElement.src = currentUrl;
+              // EL TRUCO VITAL RESTAURADO: Obliga a la TV a saltarse el caché corrupto
+              videoElement.src = currentUrl + "?update=" + new Date().getTime();
               videoElement.load();
               intentarReproducir();
             } else if (videoEncontrado !== currentUrl) {
