@@ -29,6 +29,10 @@
         let ultimaModificacion = ''; 
         let intentandoReproducir = false; 
 
+        // --- VARIABLES DE CACHÉ ---
+        const CACHE_NAME = 'margoth-media-p2';
+        let blobUrlActual = ''; 
+
         function intentarReproducir() {
             if (intentandoReproducir) return;
             intentandoReproducir = true;
@@ -40,29 +44,54 @@
             });
         }
 
-        // SISTEMAS DE SUPERVIVENCIA Y ANTI-CRASH
-        videoElement.addEventListener('error', () => {
-            window.location.reload(true);
-        });
+        // --- SISTEMA DE CACHÉ LOCAL (Escudo Anti-Cortes de Internet) ---
+        async function obtenerCopiaLocal(urlVideo) {
+            if (!('caches' in window)) return urlVideo; 
+            
+            try {
+                const cache = await caches.open(CACHE_NAME);
+                let response = await cache.match(urlVideo);
+                
+                if (!response) {
+                    console.log("No está en memoria. Descargando desde la nube...");
+                    response = await fetch(urlVideo, { cache: 'no-store' }); 
+                    if (response.ok) {
+                        await cache.put(urlVideo, response.clone());
+                    } else {
+                        return urlVideo; 
+                    }
+                } else {
+                    console.log("Video cargado desde la memoria interna de la TV.");
+                }
+                
+                const blob = await response.blob();
+                if (blobUrlActual) URL.revokeObjectURL(blobUrlActual); 
+                blobUrlActual = URL.createObjectURL(blob);
+                return blobUrlActual; 
+            } catch (e) {
+                console.error("Error en bóveda local:", e);
+                return urlVideo;
+            }
+        }
 
-        videoElement.addEventListener('stalled', () => {
-            videoElement.load();
-            intentarReproducir();
-        });
+        // --- SISTEMAS DE SUPERVIVENCIA Y ANTI-CRASH ---
+        videoElement.addEventListener('error', () => { window.location.reload(true); });
+        videoElement.addEventListener('stalled', () => { videoElement.load(); intentarReproducir(); });
 
         async function mantenerPantallaDespierta() {
             try {
-                if ('wakeLock' in navigator) {
-                    await navigator.wakeLock.request('screen');
-                }
+                if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
             } catch (err) {}
         }
         document.addEventListener('click', mantenerPantallaDespierta, { once: true });
 
-        // Lavado de RAM automático cada 2 horas (Parche WebOS)
+        // Lavado de RAM automático cada 2 horas
         setInterval(() => { window.location.reload(true); }, 7200000); 
 
-        function recargarPaginaSegura() {
+        // --- MOTOR CORE ---
+        async function recargarPaginaSegura() {
+            // Vacía la memoria antes de recargar para recibir el video nuevo
+            if ('caches' in window) await caches.delete(CACHE_NAME);
             videoElement.pause();
             videoElement.src = ''; 
             videoElement.removeAttribute('src');
@@ -146,20 +175,26 @@
 
                 if (videoEncontrado) {
                     if (currentUrl === '') {
+                        // 1. Primera carga: Lo pasa por el Caché Local
                         currentUrl = videoEncontrado;
-                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
+                        const urlSegura = await obtenerCopiaLocal(currentUrl);
+                        videoElement.src = urlSegura;
                         videoElement.load();
                         intentarReproducir();
                     } else if (videoEncontrado !== currentUrl) {
+                        // 2. Cambio de turno (Ej: de mañana a tarde)
                         recargarPaginaSegura();
                     } else {
+                        // 3. Patrullaje de 30s: Verificamos metadatos silenciosamente
                         try {
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD', cache: 'no-store' });
                             if (resHead.ok) {
                                 const modificado = resHead.headers.get('Last-Modified');
                                 if (modificado) {
                                     if (!ultimaModificacion) { ultimaModificacion = modificado; } 
-                                    else if (ultimaModificacion !== modificado) { recargarPaginaSegura(); }
+                                    else if (ultimaModificacion !== modificado) { 
+                                        recargarPaginaSegura(); 
+                                    }
                                 }
                             }
                         } catch (e) {} 

@@ -7,7 +7,7 @@
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
-            /* Fondo Salvavidas: Cambia la URL por el logo de Margoth */
+            /* Fondo Salvavidas: Logo de Margoth */
             background-color: #1a1a1a;
             background-image: url('https://project-cast.sfo3.cdn.digitaloceanspaces.com/fondo.jpg'); 
             background-position: center;
@@ -29,8 +29,11 @@
         let currentUrl = ''; 
         let ultimaModificacion = ''; 
         let intentandoReproducir = false; 
+        
+        // --- VARIABLES DE CACHÉ ---
+        const CACHE_NAME = 'margoth-media-v1';
+        let blobUrlActual = ''; 
 
-        // 1. EL "FANTASMA" DEL AUTOPLAY
         function intentarReproducir() {
             if (intentandoReproducir) return;
             intentandoReproducir = true;
@@ -42,30 +45,55 @@
             });
         }
 
-        // 2. SISTEMAS DE SUPERVIVENCIA Y ANTI-CRASH (Hardware / RAM)
-        videoElement.addEventListener('error', () => {
-            window.location.reload(true);
-        });
+        // --- SISTEMA DE CACHÉ LOCAL (Escudo Anti-Cortes de Internet) ---
+        async function obtenerCopiaLocal(urlVideo) {
+            if (!('caches' in window)) return urlVideo; 
+            
+            try {
+                const cache = await caches.open(CACHE_NAME);
+                let response = await cache.match(urlVideo);
+                
+                if (!response) {
+                    console.log("No está en memoria. Descargando desde la nube...");
+                    response = await fetch(urlVideo, { cache: 'no-store' }); 
+                    if (response.ok) {
+                        await cache.put(urlVideo, response.clone());
+                    } else {
+                        return urlVideo; 
+                    }
+                } else {
+                    console.log("Video cargado desde la memoria interna de la TV.");
+                }
+                
+                // Convertir a archivo local
+                const blob = await response.blob();
+                if (blobUrlActual) URL.revokeObjectURL(blobUrlActual); // Limpia RAM vieja
+                blobUrlActual = URL.createObjectURL(blob);
+                return blobUrlActual; 
+            } catch (e) {
+                console.error("Error en bóveda local:", e);
+                return urlVideo;
+            }
+        }
 
-        videoElement.addEventListener('stalled', () => {
-            videoElement.load();
-            intentarReproducir();
-        });
+        // --- SISTEMAS DE SUPERVIVENCIA Y ANTI-CRASH ---
+        videoElement.addEventListener('error', () => { window.location.reload(true); });
+        videoElement.addEventListener('stalled', () => { videoElement.load(); intentarReproducir(); });
 
         async function mantenerPantallaDespierta() {
             try {
-                if ('wakeLock' in navigator) {
-                    await navigator.wakeLock.request('screen');
-                }
+                if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
             } catch (err) {}
         }
         document.addEventListener('click', mantenerPantallaDespierta, { once: true });
 
-        // Lavado de RAM automático cada 2 horas (Parche WebOS)
+        // Lavado de RAM automático cada 2 horas
         setInterval(() => { window.location.reload(true); }, 7200000); 
 
-        // 3. MOTOR CORE
-        function recargarPaginaSegura() {
+        // --- MOTOR CORE ---
+        async function recargarPaginaSegura() {
+            // Vacía la memoria antes de recargar para recibir el video nuevo
+            if ('caches' in window) await caches.delete(CACHE_NAME);
             videoElement.pause();
             videoElement.src = ''; 
             videoElement.removeAttribute('src');
@@ -107,7 +135,6 @@
                     }
                     throw new Error("API 2 falló");
                 } catch (error2) {
-                    // Si no hay red, aborta. Cero confianza en el reloj de la TV vieja.
                     throw new Error("Sin internet. Esperando conexión...");
                 }
             }
@@ -119,7 +146,6 @@
             const hoyUTC = Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
             const lunesActualUTC = hoyUTC - (diasParaRestar * 24 * 60 * 60 * 1000);
             
-            // Fecha de anclaje: Lunes 9 de febrero de 2026
             const fechaBaseUTC = Date.UTC(2026, 1, 9); 
             const diferenciaMs = lunesActualUTC - fechaBaseUTC;
             const semanasPasadas = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24 * 7));
@@ -152,37 +178,43 @@
 
                 if (videoEncontrado) {
                     if (currentUrl === '') {
+                        // 1. Primera carga: Lo pasa por el Caché Local
                         currentUrl = videoEncontrado;
-                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
+                        const urlSegura = await obtenerCopiaLocal(currentUrl);
+                        videoElement.src = urlSegura;
                         videoElement.load();
                         intentarReproducir();
                     } else if (videoEncontrado !== currentUrl) {
+                        // 2. Cambio de turno (Ej: de mañana a tarde)
                         recargarPaginaSegura();
                     } else {
+                        // 3. Patrullaje de 30s: Mismo video, verificamos si hay uno nuevo en el servidor
                         try {
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD', cache: 'no-store' });
                             if (resHead.ok) {
                                 const modificado = resHead.headers.get('Last-Modified');
                                 if (modificado) {
                                     if (!ultimaModificacion) { ultimaModificacion = modificado; } 
-                                    else if (ultimaModificacion !== modificado) { recargarPaginaSegura(); }
+                                    else if (ultimaModificacion !== modificado) { 
+                                        // Mercadeo subió un cambio. Recargamos la página.
+                                        recargarPaginaSegura(); 
+                                    }
                                 }
                             }
-                        } catch (e) {} 
+                        } catch (e) {} // Falla silenciosa si no hay internet (sigue reproduciendo el caché local)
                     }
                 }
             } catch (error) { 
                 console.error("Error Core:", error); 
             } finally {
+                // Se repite cada 30 segundos exactos
                 setTimeout(cargarPlaylist, 30000); 
             }
         }
 
-        // El vigilante silencioso
+        // El vigilante silencioso extra
         setInterval(() => { 
-            if(videoElement.paused && videoElement.src) {
-                intentarReproducir(); 
-            }
+            if(videoElement.paused && videoElement.src) { intentarReproducir(); }
         }, 5000); 
 
         // Arranque
