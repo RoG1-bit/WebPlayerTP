@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Optimizado P1 - FIX Rompecaché</title>
+    <title>Reproductor Estándar P1/P2 - Optimización Extrema</title>
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
@@ -18,6 +18,7 @@
     <video id="videoPlayer" muted playsinline loop preload="auto"></video>
     
     <script>
+        // CAMBIA EL JSON SEGÚN LA PANTALLA (P1 o P2)
         const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/playlist_p1.json';
         const videoElement = document.getElementById('videoPlayer');
         let currentUrl = ''; 
@@ -30,18 +31,22 @@
             videoElement.play().then(() => { intentandoReproducir = false; }).catch(() => { intentandoReproducir = false; });
         }
 
-        // DESTRUCCIÓN DE MEMORIA Y RECARGA
-        function forzarLavadoRAM() {
+        // MOTOR DE LIBERACIÓN DE RAM ESTRICTO
+        function lavarRAM() {
             videoElement.pause();
             videoElement.removeAttribute('src'); 
-            videoElement.load(); 
-            setTimeout(() => { window.location.href = window.location.href.split('?')[0] + '?r=' + new Date().getTime(); }, 500);
+            videoElement.load(); // Fuerza al motor multimedia a liberar la memoria
+            setTimeout(() => { 
+                // .replace() no genera historial, ahorrando RAM
+                window.location.replace(window.location.pathname + '?r=' + new Date().getTime()); 
+            }, 500);
         }
 
-        // LAVADO AUTOMÁTICO CADA 45 MINUTOS 
-        setInterval(forzarLavadoRAM, 2700000); 
+        // LIBERACIÓN AUTOMÁTICA CADA 45 MINUTOS
+        setInterval(lavarRAM, 2700000); 
 
-        videoElement.addEventListener('error', forzarLavadoRAM);
+        // SISTEMAS ANTI-CRASH
+        videoElement.addEventListener('error', () => { setTimeout(lavarRAM, 3000); });
         videoElement.addEventListener('stalled', () => { videoElement.load(); intentarReproducir(); });
         document.addEventListener('click', async () => { try { if ('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch (e) {} }, { once: true });
 
@@ -56,8 +61,7 @@
                     const res2 = await fetchSeguro('https://worldtimeapi.org/api/timezone/America/El_Salvador');
                     if (res2.ok) { const data2 = await res2.json(); const svTime = new Date((data2.unixtime * 1000) - (6 * 3600000)); return { getFullYear: () => svTime.getUTCFullYear(), getMonth: () => svTime.getUTCMonth(), getDate: () => svTime.getUTCDate(), getDay: () => svTime.getUTCDay(), getHours: () => svTime.getUTCHours(), getMinutes: () => svTime.getUTCMinutes() }; } throw new Error("API 2 falló");
                 } catch (error2) { 
-                    const localDate = new Date();
-                    return { getFullYear: () => localDate.getFullYear(), getMonth: () => localDate.getMonth(), getDate: () => localDate.getDate(), getDay: () => localDate.getDay(), getHours: () => localDate.getHours(), getMinutes: () => localDate.getMinutes() }; 
+                    const localDate = new Date(); return { getFullYear: () => localDate.getFullYear(), getMonth: () => localDate.getMonth(), getDate: () => localDate.getDate(), getDay: () => localDate.getDay(), getHours: () => localDate.getHours(), getMinutes: () => localDate.getMinutes() }; 
                 }
             }
         }
@@ -91,18 +95,18 @@
                 if (videoEncontrado) {
                     if (currentUrl === '') {
                         currentUrl = videoEncontrado;
-                        // AQUÍ ESTÁ LA MAGIA PARA SALTARSE EL ERROR:
-                        videoElement.src = currentUrl + '?update=' + new Date().getTime();
+                        // URL limpia para evitar bloqueos del servidor
+                        videoElement.src = currentUrl;
                         videoElement.load();
                         intentarReproducir();
                     } else if (videoEncontrado !== currentUrl) {
-                        forzarLavadoRAM();
+                        lavarRAM();
                     } else {
                         try {
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD', cache: 'no-store' });
                             if (resHead.ok) {
                                 const modificado = resHead.headers.get('Last-Modified');
-                                if (modificado) { if (!ultimaModificacion) { ultimaModificacion = modificado; } else if (ultimaModificacion !== modificado) { forzarLavadoRAM(); } }
+                                if (modificado) { if (!ultimaModificacion) { ultimaModificacion = modificado; } else if (ultimaModificacion !== modificado) { lavarRAM(); } }
                             }
                         } catch (e) {} 
                     }

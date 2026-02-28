@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P4 - LABORATORIO VIDAA</title>
+    <style>
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
+            background-color: #1a1a1a;
+            background-image: url('https://project-cast.sfo3.cdn.digitaloceanspaces.com/fondo.jpg'); 
+            background-position: center; background-repeat: no-repeat; background-size: contain;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 5; }
+        /* LA CONSOLA DE DIAGNÓSTICO */
+        #debugConsole {
+            position: absolute; top: 10px; left: 10px; z-index: 9999;
+            background-color: rgba(0, 0, 0, 0.85); color: #00FF00;
+            font-family: monospace; font-size: 20px; padding: 15px;
+            border: 2px solid #00FF00; border-radius: 8px;
+            max-width: 80%; word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div id="debugConsole">INICIANDO DIAGNÓSTICO P4...</div>
+    <video id="videoPlayer" muted playsinline loop preload="auto"></video>
+    
+    <script>
+        const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/playlist_p4.json';
+        const videoElement = document.getElementById('videoPlayer');
+        const debugConsole = document.getElementById('debugConsole');
+        
+        let currentUrl = ''; 
+        let logMsg = "Iniciando sistema...";
+        window.linkLocalActual = null; 
+
+        // Actualizador de la pantalla verde
+        function updateDebug(msg) {
+            logMsg = msg;
+            let netState = videoElement.networkState;
+            let netText = ["0: VACÍO", "1: IDLE", "2: DESCARGANDO", "3: ERROR RED"][netState] || netState;
+            
+            debugConsole.innerHTML = `
+                <strong>LABORATORIO HISENSE P4</strong><br>
+                ESTADO: ${logMsg}<br>
+                SOPORTA CACHÉ: ${'caches' in window ? 'SÍ' : 'NO'}<br>
+                URL: ${currentUrl ? currentUrl.split('/').pop() : 'Ninguna'}<br>
+                RED VIDEO: ${netText}
+            `;
+        }
+        setInterval(() => updateDebug(logMsg), 1000);
+
+        function intentarReproducir() {
+            updateDebug("Intentando dar Play...");
+            videoElement.play().catch(e => updateDebug("ERROR PLAY: " + e.message));
+        }
+
+        async function reproductorUniversal(urlVideo) {
+            if (!('caches' in window)) {
+                updateDebug("Modo: Streaming (Caché no soportado)");
+                videoElement.src = urlVideo; intentarReproducir(); return; 
+            }
+
+            try {
+                updateDebug("Abriendo Bóveda...");
+                const boveda = await caches.open('margoth-boveda-p4');
+                let archivo = await boveda.match(urlVideo);
+
+                if (!archivo) {
+                    updateDebug("Descargando video a bóveda...");
+                    archivo = await fetch(urlVideo);
+                    if (!archivo.ok) throw new Error("Error HTTP al descargar");
+                    await boveda.put(urlVideo, archivo.clone());
+                    updateDebug("¡Video guardado en TV!");
+                } else {
+                    updateDebug("¡Video encontrado en memoria interna!");
+                }
+
+                const videoBlob = await archivo.blob();
+                if (window.linkLocalActual) URL.revokeObjectURL(window.linkLocalActual);
+                window.linkLocalActual = URL.createObjectURL(videoBlob);
+                
+                updateDebug("Inyectando Blob al reproductor...");
+                videoElement.src = window.linkLocalActual;
+
+                try {
+                    await videoElement.play();
+                    updateDebug("Reproduciendo desde Caché OK");
+                } catch (e) {
+                    updateDebug("VIDAA rechazó el Blob. Usando URL directa.");
+                    videoElement.src = urlVideo; intentarReproducir();
+                }
+
+            } catch (errorTotal) {
+                updateDebug("FALLO DE BÓVEDA: " + errorTotal.message + " -> Streaming");
+                videoElement.src = urlVideo; intentarReproducir();
+            }
+        }
+
+        function fetchSeguro(url) { return Promise.race([ fetch(url, { cache: 'no-store' }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), 3000)) ]); }
+
+        async function obtenerFechaReal() {
+            try {
+                const res1 = await fetchSeguro('https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador');
+                if (res1.ok) { const data = await res1.json(); return { getHours: () => data.hour, getMinutes: () => data.minute }; } throw new Error();
+            } catch (e) {
+                const d = new Date(); return { getHours: () => d.getHours(), getMinutes: () => d.getMinutes() }; 
+            }
+        }
+
+        async function cargarPlaylist() {
+            try {
+                updateDebug("Leyendo JSON P4...");
+                const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime(), { cache: 'no-store' });
+                if (!response.ok) { updateDebug("ERROR: JSON no encontrado (404)"); return; }
+                
+                let data = await response.json();
+                const ahora = await obtenerFechaReal();
+                const horaActual = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
+                
+                let videoEncontrado = '';
+                if (data && data.programacion) {
+                    for (let turno of data.programacion) {
+                        if (horaActual >= turno.inicio && horaActual <= turno.fin) {
+                            videoEncontrado = turno.url; break; 
+                        }
+                    }
+                }
+
+                if (videoEncontrado) {
+                    if (currentUrl !== videoEncontrado) {
+                        currentUrl = videoEncontrado;
+                        reproductorUniversal(currentUrl);
+                    }
+                } else {
+                    updateDebug("JSON no tiene video para las " + horaActual);
+                }
+            } catch (error) { updateDebug("Error al procesar JSON"); } 
+            finally { setTimeout(cargarPlaylist, 10000); }
+        }
+
+        cargarPlaylist();
+    </script>
+</body>
+</html>

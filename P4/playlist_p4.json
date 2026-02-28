@@ -8,19 +8,19 @@
       "horario": "manana",
       "inicio": "00:00",
       "fin": "10:29",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/P4/p3_manana.mp4"
+      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_manana.mp4"
     },
     {
       "horario": "mediodia",
       "inicio": "10:30",
       "fin": "13:59",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/P4/p4_mediodia.mp4"
+      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_mediodia.mp4"
     },
     {
       "horario": "tarde",
       "inicio": "14:00",
       "fin": "23:59",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/P4/p3_tarde.mp4"
+      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_tarde.mp4"
     }
   ]
 }
