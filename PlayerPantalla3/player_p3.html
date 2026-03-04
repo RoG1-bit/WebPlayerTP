@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Estándar P3 - Optimización Extrema</title>
+    <title>Pantalla 3</title>
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
@@ -30,14 +30,21 @@
             videoElement.play().then(() => { intentandoReproducir = false; }).catch(() => { intentandoReproducir = false; });
         }
 
-        // MOTOR DE LIBERACIÓN DE RAM ESTRICTO
+        // MOTOR DE LIBERACIÓN DE RAM (CON MODO SUPERVIVENCIA)
         function lavarRAM() {
             videoElement.pause();
             videoElement.removeAttribute('src'); 
             videoElement.load();
-            setTimeout(() => { 
-                window.location.replace(window.location.pathname + '?r=' + new Date().getTime()); 
-            }, 500);
+            currentUrl = ''; // Se borra la memoria para obligar a reinyectar el video al volver la red
+
+            // ESCUDO OFFLINE: Solo recarga la página si la TV tiene internet
+            if (navigator.onLine) {
+                setTimeout(() => { 
+                    window.location.replace(window.location.pathname + '?r=' + new Date().getTime()); 
+                }, 500);
+            } else {
+                console.log("Internet caído. P3 en espera...");
+            }
         }
 
         // LIBERACIÓN AUTOMÁTICA CADA 45 MINUTOS
@@ -66,6 +73,9 @@
 
         async function cargarPlaylist() {
             try {
+                // ESCUDO OFFLINE: Si no hay red, abortamos la lectura silenciosamente
+                if (!navigator.onLine) throw new Error("Offline");
+
                 const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime(), { cache: 'no-store' });
                 if (!response.ok) return; 
                 let data; try { data = await response.json(); } catch (e) { return; } 
@@ -108,7 +118,8 @@
             } catch (error) {} finally { setTimeout(cargarPlaylist, 30000); }
         }
 
-        setInterval(() => { if(videoElement.paused && videoElement.src) intentarReproducir(); }, 5000); 
+        // ESCUDO OFFLINE: El motor de reintento respeta si hay internet
+        setInterval(() => { if(videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000); 
         cargarPlaylist();
     </script>
 </body>

@@ -1,26 +1,25 @@
 {
-  "config": {
-    "pantalla": "3",
-    "actualizar_cada": 60
+  "config": { "pantalla": "1" },
+  "fijos": {
+    "manana": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_manana.mp4",
+    "tarde": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_tarde.mp4"
   },
-  "programacion": [
-    {
-      "horario": "manana",
-      "inicio": "00:00",
-      "fin": "10:29",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_manana.mp4"
-    },
-    {
-      "horario": "mediodia",
-      "inicio": "10:30",
-      "fin": "13:59",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_mediodia.mp4"
-    },
-    {
-      "horario": "tarde",
-      "inicio": "14:00",
-      "fin": "23:59",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_tarde.mp4"
-    }
-  ]
+  "almuerzos_s1": {
+    "1": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s1_lunes.png",
+    "2": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s1_martes.png",
+    "3": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s1_miercoles.png",
+    "4": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s1_jueves.png",
+    "5": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s1_viernes.png",
+    "6": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s1_sabado.png",
+    "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s1_domingo.png"
+  },
+  "almuerzos_s2": {
+    "1": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s2_lunes.png",
+    "2": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s2_martes.png",
+    "3": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s2_miercoles.png",
+    "4": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s2_jueves.png",
+    "5": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s2_viernes.png",
+    "6": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s2_sabado.png",
+    "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p1_s2_domingo.png"
+  }
 }
