@@ -31,36 +31,36 @@
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_perfil1.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_manana_perfil1.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_perfil1.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_tarde_perfil1.mp4"
       }
     ],
     "perfil2": [
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_perfil2.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_manana_perfil2.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_perfil2.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_tarde_perfil2.mp4"
       }
     ],
     "perfil1_buffet": [
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_perfil1_buffet.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_manana_perfil1_buffet.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_perfil1.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_tarde_perfil1_buffet.mp4"
       }
     ],
     "default": [
