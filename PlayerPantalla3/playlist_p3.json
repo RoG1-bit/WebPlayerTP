@@ -67,12 +67,12 @@
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_nacional.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_manana_nacional.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_nacional.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_tarde_nacional.mp4"
       }
     ]
   }
