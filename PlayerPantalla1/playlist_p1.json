@@ -4,6 +4,30 @@
     "manana": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_manana.mp4",
     "tarde": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_tarde.mp4"
   },
+  "excepciones_manana": {
+    "zacatecoluca": {
+      "6": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_zacatecoluca.mp4",
+      "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_zacatecoluca.mp4"
+    },
+    "bambu": {
+      "6": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_bambu.mp4",
+      "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_bambu.mp4"
+    },
+    "zarzamora": {
+      "6": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_zarzamora.mp4",
+      "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_zarzamora.mp4"
+    },
+    "lasramblas": {
+      "6": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_lasramblas.mp4",
+      "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_lasramblas.mp4"
+    },
+    "laskina": {
+      "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_laskina.mp4"
+    },
+    "surfcity": {
+      "7": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_buffet_surfcity.mp4"
+    }
+  },
   "almuerzos_s1": {
     "1": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_s1_lunes.mp4",
     "2": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla1/p1_s1_martes.mp4",

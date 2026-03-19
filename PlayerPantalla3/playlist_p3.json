@@ -1,26 +1,79 @@
 {
   "config": {
-    "pantalla": "3",
-    "actualizar_cada": 60
+    "pantalla": "3"
   },
-  "programacion": [
-    {
-      "horario": "manana",
-      "inicio": "00:00",
-      "fin": "10:29",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_manana.mp4"
-    },
-    {
-      "horario": "mediodia",
-      "inicio": "10:30",
-      "fin": "13:59",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_mediodia.mp4"
-    },
-    {
-      "horario": "tarde",
-      "inicio": "14:00",
-      "fin": "23:59",
-      "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/p3_tarde.mp4"
-    }
-  ]
+  "excepciones_temporales": {
+    "ejemplo_sucursal": [
+      {
+        "inicio": "00:00",
+        "fin": "23:59",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_aniversario_ejemplo.mp4"
+      }
+    ]
+  },
+  "asignacion_perfiles": {
+    "acacias": "perfil1",
+    "plazamerliot": "perfil1",
+    "ciudaddorada": "perfil1",
+    "carretera": "perfil1",
+    "chiltiupan": "perfil2",
+    "escalon": "perfil2",
+    "valledulce": "perfil3",
+    "opico": "perfil3",
+    "zacatecoluca": "perfil1_buffet",
+    "zarzamora": "perfil3_buffet",
+    "lasramblas": "perfil3_buffet",
+    "surfcity": "perfil3_buffet",
+    "bambu": "perfil4_buffet"
+  },
+  "perfiles": {
+    "perfil1": [
+      {
+        "inicio": "00:00",
+        "fin": "10:29",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_perfil1.mp4"
+      },
+      {
+        "inicio": "10:30",
+        "fin": "23:59",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_perfil1.mp4"
+      }
+    ],
+    "perfil2": [
+      {
+        "inicio": "00:00",
+        "fin": "10:29",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_perfil2.mp4"
+      },
+      {
+        "inicio": "10:30",
+        "fin": "23:59",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_perfil2.mp4"
+      }
+    ],
+    "perfil1_buffet": [
+      {
+        "inicio": "00:00",
+        "fin": "10:29",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_perfil1_buffet.mp4"
+      },
+      {
+        "inicio": "10:30",
+        "fin": "23:59",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_perfil1.mp4"
+      }
+    ],
+    "default": [
+      {
+        "inicio": "00:00",
+        "fin": "10:29",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_manana_nacional.mp4"
+      },
+      {
+        "inicio": "10:30",
+        "fin": "23:59",
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_tarde_nacional.mp4"
+      }
+    ]
+  }
 }
