@@ -18,7 +18,6 @@
     <video id="videoPlayer" muted playsinline loop preload="auto"></video>
     
     <script>
-        // CAMBIA EL JSON SEGÚN LA PANTALLA (P1 o P2)
         const URL_PLAYLIST = 'https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla2/playlist_p2.json';
         const videoElement = document.getElementById('videoPlayer');
         let currentUrl = ''; 
@@ -31,25 +30,22 @@
             videoElement.play().then(() => { intentandoReproducir = false; }).catch(() => { intentandoReproducir = false; });
         }
 
-        // MOTOR DE LIBERACIÓN DE RAM (CON MODO SUPERVIVENCIA)
         function lavarRAM() {
             videoElement.pause();
             videoElement.removeAttribute('src'); 
             videoElement.load(); 
-            currentUrl = ''; // Se borra la memoria para obligar a reinyectar el video al volver la red
+            currentUrl = ''; 
 
-            // ESCUDO OFFLINE: Solo recarga la página si la TV tiene internet
             if (navigator.onLine) {
                 setTimeout(() => { 
-                    window.location.replace(window.location.pathname + '?r=' + new Date().getTime()); 
+                    // CAMBIO APLICADO: Se asegura que la recarga de página también ignore el caché del navegador
+                    window.location.replace(window.location.origin + window.location.pathname + '?r=' + new Date().getTime()); 
                 }, 500);
             }
         }
 
-        // LIBERACIÓN AUTOMÁTICA CADA 45 MINUTOS
         setInterval(lavarRAM, 2700000); 
 
-        // SISTEMAS ANTI-CRASH
         videoElement.addEventListener('error', () => { setTimeout(lavarRAM, 3000); });
         videoElement.addEventListener('stalled', () => { videoElement.load(); intentarReproducir(); });
         document.addEventListener('click', async () => { try { if ('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch (e) {} }, { once: true });
@@ -79,7 +75,6 @@
 
         async function cargarPlaylist() {
             try {
-                // ESCUDO OFFLINE: Si no hay red, abortamos la lectura silenciosamente
                 if (!navigator.onLine) throw new Error("Offline");
 
                 const response = await fetch(URL_PLAYLIST + '?t=' + new Date().getTime(), { cache: 'no-store' });
@@ -102,7 +97,8 @@
                 if (videoEncontrado) {
                     if (currentUrl === '') {
                         currentUrl = videoEncontrado;
-                        videoElement.src = currentUrl;
+                        // CAMBIO APLICADO: Se agrega el timestamp a la URL del video para forzar la descarga
+                        videoElement.src = currentUrl + '?v=' + new Date().getTime(); 
                         videoElement.load();
                         intentarReproducir();
                     } else if (videoEncontrado !== currentUrl) {
@@ -112,7 +108,14 @@
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD', cache: 'no-store' });
                             if (resHead.ok) {
                                 const modificado = resHead.headers.get('Last-Modified');
-                                if (modificado) { if (!ultimaModificacion) { ultimaModificacion = modificado; } else if (ultimaModificacion !== modificado) { lavarRAM(); } }
+                                if (modificado) { 
+                                    if (!ultimaModificacion) { 
+                                        ultimaModificacion = modificado; 
+                                    } else if (ultimaModificacion !== modificado) { 
+                                        // Si detecta cambio en el servidor, reinicia para cargar el nuevo video
+                                        lavarRAM(); 
+                                    } 
+                                }
                             }
                         } catch (e) {} 
                     }
@@ -120,7 +123,6 @@
             } catch (error) {} finally { setTimeout(cargarPlaylist, 30000); }
         }
 
-        // ESCUDO OFFLINE: El motor de reintento respeta si hay internet
         setInterval(() => { if(videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000); 
         cargarPlaylist();
     </script>

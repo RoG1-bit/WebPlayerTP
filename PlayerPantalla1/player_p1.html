@@ -41,7 +41,8 @@
             // ESCUDO OFFLINE: Solo recarga la página si la TV tiene internet
             if (navigator.onLine) {
                 setTimeout(() => { 
-                    window.location.replace(window.location.pathname + '?r=' + new Date().getTime()); 
+                    // CAMBIO APLICADO: Se asegura que la recarga de página (con origin) ignore el caché
+                    window.location.replace(window.location.origin + window.location.pathname + '?r=' + new Date().getTime()); 
                 }, 500);
             }
         }
@@ -102,7 +103,8 @@
                 if (videoEncontrado) {
                     if (currentUrl === '') {
                         currentUrl = videoEncontrado;
-                        videoElement.src = currentUrl;
+                        // CAMBIO APLICADO: Agregado el parámetro de tiempo para evadir el caché del video
+                        videoElement.src = currentUrl + '?v=' + new Date().getTime();
                         videoElement.load();
                         intentarReproducir();
                     } else if (videoEncontrado !== currentUrl) {
@@ -112,7 +114,13 @@
                             const resHead = await fetch(currentUrl + '?check=' + new Date().getTime(), { method: 'HEAD', cache: 'no-store' });
                             if (resHead.ok) {
                                 const modificado = resHead.headers.get('Last-Modified');
-                                if (modificado) { if (!ultimaModificacion) { ultimaModificacion = modificado; } else if (ultimaModificacion !== modificado) { lavarRAM(); } }
+                                if (modificado) { 
+                                    if (!ultimaModificacion) { 
+                                        ultimaModificacion = modificado; 
+                                    } else if (ultimaModificacion !== modificado) { 
+                                        lavarRAM(); 
+                                    } 
+                                }
                             }
                         } catch (e) {} 
                     }
