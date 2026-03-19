@@ -2,7 +2,7 @@
   "config": {
     "pantalla": "5"
   },
-  "default": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla5/p5_nacional.mp4",
+  "default": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla5/p5_prueba_1.mp4",
   "perfiles": {
     "chiltiupan": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla5/p5_perfilA.mp4",
     "valledulce": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla5/p5_perfilB.mp4",
