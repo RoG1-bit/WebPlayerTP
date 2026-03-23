@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla 2 - Multi-Sucursal</title>
+    <title>Pantalla 2 - Multi-Sucursal (Optimizada)</title>
     <style>
       body,
       html {
@@ -236,8 +236,10 @@
           if (videoEncontrado) {
             if (currentUrl === "") {
               currentUrl = videoEncontrado;
-              // Mantiene tu inyección anti-caché del video
-              videoElement.src = currentUrl + "?v=" + new Date().getTime();
+              
+              // 🚨🚨 OPTIMIZACIÓN 1: URL LIMPIA SIN CACHÉ BUSTING 🚨🚨
+              videoElement.src = currentUrl; 
+              
               videoElement.load();
               intentarReproducir();
             } else if (videoEncontrado !== currentUrl) {
@@ -263,7 +265,8 @@
           }
         } catch (error) {
         } finally {
-          setTimeout(cargarPlaylist, 30000);
+          // 🚨🚨 OPTIMIZACIÓN 2: RELAJAR CONSULTA A 10 MINUTOS 🚨🚨
+          setTimeout(cargarPlaylist, 600000);
         }
       }
 
