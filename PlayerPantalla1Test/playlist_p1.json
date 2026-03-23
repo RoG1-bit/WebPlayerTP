@@ -1,0 +1,49 @@
+{
+  "config": { "pantalla": "1" },
+  "fijos": {
+    "manana": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_manana.mp4",
+    "tarde": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_tarde.mp4"
+  },
+  "excepciones_manana": {
+    "zacatecoluca": {
+      "6": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_zacatecoluca.mp4",
+      "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_zacatecoluca.mp4"
+    },
+    "bambu": {
+      "6": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_bambu.mp4",
+      "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_bambu.mp4"
+    },
+    "zarzamora": {
+      "6": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_zarzamora.mp4",
+      "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_zarzamora.mp4"
+    },
+    "lasramblas": {
+      "6": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_lasramblas.mp4",
+      "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_lasramblas.mp4"
+    },
+    "laskina": {
+      "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_laskina.mp4"
+    },
+    "surfcity": {
+      "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_buffet_surfcity.mp4"
+    }
+  },
+  "almuerzos_s1": {
+    "1": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s1_lunes.mp4",
+    "2": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s1_martes.mp4",
+    "3": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s1_miercoles.mp4",
+    "4": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s1_jueves.mp4",
+    "5": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s1_viernes.mp4",
+    "6": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s1_sabado.mp4",
+    "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test /p1_s１_domingo.mp4"
+  },
+  "almuerzos_s2": {
+    "1": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s2_lunes.mp4",
+    "2": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s2_martes.mp4",
+    "3": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s2_miercoles.mp4",
+    "4": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s2_jueves.mp4",
+    "5": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s2_viernes.mp4",
+    "6": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s2_sabado.mp4",
+    "7": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1test/p1_s2_domingo.mp4"
+  }
+}

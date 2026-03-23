@@ -2,12 +2,12 @@
   "config": {
     "pantalla": "4"
   },
-  "default": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_nacional.mp4",
+  "default": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_nacional.mp4",
   "perfiles": {
-    "chiltiupan": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_perfilA.mp4",
-    "valledulce": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_perfilB.mp4",
-    "zarzamora": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_perfilB.mp4",
-    "lasramblas": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_perfilB.mp4",
-    "bambu": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla4/p4_perfilC.mp4"
+    "chiltiupan": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_perfilA.mp4",
+    "valledulce": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_perfilB.mp4",
+    "zarzamora": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_perfilB.mp4",
+    "lasramblas": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_perfilB.mp4",
+    "bambu": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_perfilC.mp4"
   }
 }

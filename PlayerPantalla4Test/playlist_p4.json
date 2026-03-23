@@ -1,0 +1,13 @@
+{
+  "config": {
+    "pantalla": "4"
+  },
+  "default": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4test/p4_nacional.mp4",
+  "perfiles": {
+    "chiltiupan": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4test/p4_perfilA.mp4",
+    "valledulce": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4test/p4_perfilB.mp4",
+    "zarzamora": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4test/p4_perfilB.mp4",
+    "lasramblas": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4test/p4_perfilB.mp4",
+    "bambu": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4test/p4_perfilC.mp4"
+  }
+}

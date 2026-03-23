@@ -7,7 +7,7 @@
       {
         "inicio": "00:00",
         "fin": "23:59",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3/p3_aniversario_ejemplo.mp4"
+        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3test/p3_aniversario_ejemplo.mp4"
       }
     ]
   },
@@ -31,48 +31,48 @@
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev//pantalla3/p3_manana_perfil1.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_perfil1.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_perfil1.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_perfil1.mp4"
       }
     ],
     "perfil2": [
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_perfil2.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_perfil2.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_perfil2.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_perfil2.mp4"
       }
     ],
     "perfil1_buffet": [
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_perfil1_buffet.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_perfil1_buffet.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_perfil1_buffet.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_perfil1_buffet.mp4"
       }
     ],
     "default": [
       {
         "inicio": "00:00",
         "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_nacional.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_nacional.mp4"
       },
       {
         "inicio": "10:30",
         "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_nacional.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_nacional.mp4"
       }
     ]
   }
