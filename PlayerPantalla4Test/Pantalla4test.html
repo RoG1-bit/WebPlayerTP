@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla-1-Staging</title>
+    <title>Pantalla-4-Staging</title>
     <style>
       body,
       html {
@@ -31,11 +31,12 @@
     <video id="videoPlayer" muted playsinline loop preload="auto"></video>
 
     <script>
+      // Ruta al JSON de la Pantalla 4
       const URL_PLAYLIST =
-        "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/playlist_p3.json";
+        "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4test/playlist_p4test.json";
       const videoElement = document.getElementById("videoPlayer");
 
-      // --- IDENTIDAD DE LA SUCURSAL ---
+      // --- IDENTIFICADOR DE SUCURSAL ---
       const urlParams = new URLSearchParams(window.location.search);
       const sucursalActual = urlParams.get("sucursal")
         ? urlParams.get("sucursal").toLowerCase()
@@ -98,49 +99,6 @@
         { once: true },
       );
 
-      function fetchSeguro(url, timeoutMs = 3000) {
-        return Promise.race([
-          fetch(url, { cache: "no-store" }),
-          new Promise((_, r) =>
-            setTimeout(() => r(new Error("Timeout")), timeoutMs),
-          ),
-        ]);
-      }
-
-      async function obtenerFechaReal() {
-        try {
-          const res1 = await fetchSeguro(
-            "https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador",
-          );
-          if (res1.ok) {
-            const data = await res1.json();
-            return { getHours: () => data.hour, getMinutes: () => data.minute };
-          }
-          throw new Error("API 1 falló");
-        } catch (error1) {
-          try {
-            const res2 = await fetchSeguro(
-              "https://worldtimeapi.org/api/timezone/America/El_Salvador",
-            );
-            if (res2.ok) {
-              const data2 = await res2.json();
-              const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000);
-              return {
-                getHours: () => svTime.getUTCHours(),
-                getMinutes: () => svTime.getUTCMinutes(),
-              };
-            }
-            throw new Error("API 2 falló");
-          } catch (error2) {
-            const localDate = new Date();
-            return {
-              getHours: () => localDate.getHours(),
-              getMinutes: () => localDate.getMinutes(),
-            };
-          }
-        }
-      }
-
       async function cargarPlaylist() {
         try {
           if (!navigator.onLine) throw new Error("Offline");
@@ -157,49 +115,15 @@
             return;
           }
 
-          const ahora = await obtenerFechaReal();
-          const horaActual =
-            String(ahora.getHours()).padStart(2, "0") +
-            ":" +
-            String(ahora.getMinutes()).padStart(2, "0");
-
           let videoEncontrado = "";
 
-          // CASCADA NIVEL 1: ¿Hay una excepción temporal para esta sucursal hoy?
-          if (
-            data.excepciones_temporales &&
-            data.excepciones_temporales[sucursalActual]
-          ) {
-            for (let turno of data.excepciones_temporales[sucursalActual]) {
-              if (horaActual >= turno.inicio && horaActual <= turno.fin) {
-                videoEncontrado = turno.url;
-                break;
-              }
-            }
+          // Lógica directa: Busca el video de la sucursal, si no existe, usa el default
+          if (data.perfiles && data.perfiles[sucursalActual]) {
+            videoEncontrado = data.perfiles[sucursalActual];
+          } else if (data.default) {
+            videoEncontrado = data.default;
           }
 
-          // CASCADA NIVEL 2: Si no hay excepción, buscar el Perfil Asignado
-          if (!videoEncontrado) {
-            // Descubre a qué perfil pertenece esta sucursal (o usa 'default' si no está en la lista)
-            let miPerfil =
-              data.asignacion_perfiles &&
-              data.asignacion_perfiles[sucursalActual]
-                ? data.asignacion_perfiles[sucursalActual]
-                : "default";
-
-            // Busca los horarios de ese perfil
-            let horariosPerfil =
-              data.perfiles[miPerfil] || data.perfiles["default"];
-
-            for (let turno of horariosPerfil) {
-              if (horaActual >= turno.inicio && horaActual <= turno.fin) {
-                videoEncontrado = turno.url;
-                break;
-              }
-            }
-          }
-
-          // REPRODUCCIÓN Y ANTI-CACHÉ
           if (videoEncontrado) {
             if (currentUrl === "") {
               currentUrl = videoEncontrado;
