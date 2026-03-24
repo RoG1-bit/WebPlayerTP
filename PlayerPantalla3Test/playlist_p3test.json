@@ -7,73 +7,83 @@
       {
         "inicio": "00:00",
         "fin": "23:59",
-        "url": "https://project-cast.sfo3.cdn.digitaloceanspaces.com/pantalla3test/p3_aniversario_ejemplo.mp4"
+        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_aniversario_ejemplo.mp4"
       }
     ]
   },
   "asignacion_perfiles": {
-    "acacias": "perfil1",
-    "plazamerliot": "perfil1",
-    "ciudaddorada": "perfil1",
-    "carretera": "perfil1",
-    "chiltiupan": "perfil2",
-    "escalon": "perfil2",
-    "valledulce": "perfil3",
-    "opico": "perfil3",
-    "zacatecoluca": "perfil1_buffet",
-    "zarzamora": "perfil3_buffet",
-    "lasramblas": "perfil3_buffet",
-    "surfcity": "perfil3_buffet",
-    "bambu": "perfil4_buffet"
+    "acacias": "grupo_dorada_carretera_acacias_merliot",
+    "plazamerliot": "grupo_dorada_carretera_acacias_merliot",
+    "ciudaddorada": "grupo_dorada_carretera_acacias_merliot",
+    "carretera": "grupo_dorada_carretera_acacias_merliot",
+    
+    "lasramblas": "grupo_ramblas_zarzamora",
+    "zarzamora": "grupo_ramblas_zarzamora",
+    
+    "chiltiupan": "independiente_chiltiupan",
+    "escalon": "independiente_escalon",
+    "valledulce": "independiente_valledulce",
+    "opico": "independiente_opico",
+    "zacatecoluca": "independiente_zacatecoluca",
+    "surfcity": "independiente_surfcity",
+    "bambu": "independiente_bambu",
+    "laskina": "independiente_laskina"
   },
   "perfiles": {
-    "perfil1": [
-      {
-        "inicio": "00:00",
-        "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_perfil1.mp4"
-      },
-      {
-        "inicio": "10:30",
-        "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_perfil1.mp4"
-      }
+    "grupo_dorada_carretera_acacias_merliot": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_grupo_4.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_grupo_4.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_grupo_4.mp4" }
     ],
-    "perfil2": [
-      {
-        "inicio": "00:00",
-        "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_perfil2.mp4"
-      },
-      {
-        "inicio": "10:30",
-        "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_perfil2.mp4"
-      }
+    "grupo_ramblas_zarzamora": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_ramblas_zarzamora.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_ramblas_zarzamora.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_ramblas_zarzamora.mp4" }
     ],
-    "perfil1_buffet": [
-      {
-        "inicio": "00:00",
-        "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_perfil1_buffet.mp4"
-      },
-      {
-        "inicio": "10:30",
-        "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_perfil1_buffet.mp4"
-      }
+    "independiente_chiltiupan": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_chiltiupan.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_chiltiupan.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_chiltiupan.mp4" }
+    ],
+    "independiente_escalon": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_escalon.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_escalon.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_escalon.mp4" }
+    ],
+    "independiente_valledulce": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_valledulce.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_valledulce.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_valledulce.mp4" }
+    ],
+    "independiente_opico": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_opico.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_opico.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_opico.mp4" }
+    ],
+    "independiente_zacatecoluca": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_zacatecoluca.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_zacatecoluca.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_zacatecoluca.mp4" }
+    ],
+    "independiente_surfcity": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_surfcity.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_surfcity.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_surfcity.mp4" }
+    ],
+    "independiente_bambu": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_bambu.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_bambu.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_bambu.mp4" }
+    ],
+    "independiente_laskina": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_laskina.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_laskina.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_laskina.mp4" }
     ],
     "default": [
-      {
-        "inicio": "00:00",
-        "fin": "10:29",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_manana_nacional.mp4"
-      },
-      {
-        "inicio": "10:30",
-        "fin": "23:59",
-        "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/p3_tarde_nacional.mp4"
-      }
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_manana_default.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_almuerzo_default.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/p3_tarde_default.mp4" }
     ]
   }
 }
