@@ -11,6 +11,31 @@
       }
     ]
   },
+    "excepciones_dias": {
+    "zacatecoluca": {
+      "6": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ],
+      "7": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ]
+    },
+    "laskina": {
+      "7": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ]
+    },
+    "surfcity": {
+      "7": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ]
+    },
+    "bambu": {
+      "6": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ],
+      "7": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ]
+    },
+    "zarzamora": {
+      "6": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ],
+      "7": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ]
+    },
+    "lasramblas": {
+      "6": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ],
+      "7": [ { "inicio": "00:00", "fin": "10:29", "url": "https://PON_AQUI_TU_ENLACE_R2_PUBLICO/pantalla3/p3_buffet.mp4" } ]
+    }
+  
+  },
   "asignacion_perfiles": {
     "acacias": "grupo_dorada_carretera_acacias_merliot",
     "plazamerliot": "grupo_dorada_carretera_acacias_merliot",

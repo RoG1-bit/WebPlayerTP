@@ -107,40 +107,42 @@
         ]);
       }
 
-      async function obtenerFechaReal() {
+     async function obtenerFechaReal() {
+        const dias = { Sunday: 7, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
         try {
-          const res1 = await fetchSeguro(
-            "https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador",
-          );
-          if (res1.ok) {
-            const data = await res1.json();
-            return { getHours: () => data.hour, getMinutes: () => data.minute };
-          }
+          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 20000);
+          if (res1.ok) { 
+            const data = await res1.json(); 
+            return { 
+              getHours: () => data.hour, 
+              getMinutes: () => data.minute, 
+              getDay: () => dias[data.dayOfWeek] 
+            }; 
+          } 
           throw new Error("API 1 falló");
         } catch (error1) {
           try {
-            const res2 = await fetchSeguro(
-              "https://worldtimeapi.org/api/timezone/America/El_Salvador",
-            );
-            if (res2.ok) {
-              const data2 = await res2.json();
-              const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000);
-              return {
-                getHours: () => svTime.getUTCHours(),
-                getMinutes: () => svTime.getUTCMinutes(),
-              };
-            }
+            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador", 20000);
+            if (res2.ok) { 
+              const data2 = await res2.json(); 
+              const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000); 
+              return { 
+                getHours: () => svTime.getUTCHours(), 
+                getMinutes: () => svTime.getUTCMinutes(), 
+                getDay: () => svTime.getUTCDay() === 0 ? 7 : svTime.getUTCDay() 
+              }; 
+            } 
             throw new Error("API 2 falló");
           } catch (error2) {
-            const localDate = new Date();
-            return {
-              getHours: () => localDate.getHours(),
-              getMinutes: () => localDate.getMinutes(),
+            const localDate = new Date(); 
+            return { 
+              getHours: () => localDate.getHours(), 
+              getMinutes: () => localDate.getMinutes(), 
+              getDay: () => localDate.getDay() === 0 ? 7 : localDate.getDay() 
             };
           }
         }
       }
-
       async function cargarPlaylist() {
         try {
           if (!navigator.onLine) throw new Error("Offline");
@@ -178,7 +180,20 @@
             }
           }
 
-          // CASCADA NIVEL 2: Si no hay excepción, buscar el Perfil Asignado
+          // CASCADA NIVEL 1.5: ¿Es fin de semana y tiene video especial de Buffet asignado?
+          if (!videoEncontrado) {
+            let dia = ahora.getDay();
+            if (data.excepciones_dias && data.excepciones_dias[sucursalActual] && data.excepciones_dias[sucursalActual][dia]) {
+              for (let turno of data.excepciones_dias[sucursalActual][dia]) {
+                if (horaActual >= turno.inicio && horaActual <= turno.fin) {
+                  videoEncontrado = turno.url;
+                  break;
+                }
+              }
+            }
+          }
+
+          // CASCADA NIVEL 2: Si no hay excepción temporal ni de buffet, buscar el Perfil Asignado
           if (!videoEncontrado) {
             // Descubre a qué perfil pertenece esta sucursal (o usa 'default' si no está en la lista)
             let miPerfil =
