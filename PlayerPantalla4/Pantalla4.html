@@ -46,7 +46,7 @@
       videoElement.addEventListener("stalled", () => { videoElement.load(); intentarReproducir(); });
       document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
 
-      function fetchSeguro(url, timeoutMs = 3000) {
+      function fetchSeguro(url, timeoutMs = 20000) {
         return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
@@ -115,9 +115,12 @@
             }
           }
         } catch (error) {
-        } finally {
-          setTimeout(cargarPlaylist, 600000); // Descansa 10 minutos
+          // Si el WiFi falló, reintenta en 15 SEGUNDOS
+          setTimeout(cargarPlaylist, 15000);
+          return;
         }
+        // Si todo cargó bien, descansa 10 minutos
+        setTimeout(cargarPlaylist, 600000);
       }
 
       setInterval(() => { if (videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000);

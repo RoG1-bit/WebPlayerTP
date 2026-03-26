@@ -100,7 +100,7 @@
         { once: true },
       );
 
-      function fetchSeguro(url, timeoutMs = 3000) {
+      function fetchSeguro(url, timeoutMs = 20000) {//20s para que no muera en el intento de obtener la hora
         return Promise.race([
           fetch(url, { cache: "no-store" }),
           new Promise((_, r) =>
@@ -264,11 +264,13 @@
             }
           }
         } catch (error) {
-        } finally {
-          // 🚨🚨 OPTIMIZACIÓN 2: RELAJAR CONSULTA A 10 MINUTOS 🚨🚨
-          setTimeout(cargarPlaylist, 600000);
-        }
-      }
+          // Si el WiFi falló o está super lento, reintenta en 15 SEGUNDOS, no en 10 minutos.
+    setTimeout(cargarPlaylist, 15000); 
+    return;
+    }
+  // Si todo cargó bien y el video ya está sonando, entonces sí, descansa 10 minutos.
+  setTimeout(cargarPlaylist, 600000);
+   }
 
       setInterval(() => {
         if (videoElement.paused && videoElement.src && navigator.onLine)

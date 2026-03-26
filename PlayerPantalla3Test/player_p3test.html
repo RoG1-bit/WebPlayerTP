@@ -98,7 +98,7 @@
         { once: true },
       );
 
-      function fetchSeguro(url, timeoutMs = 3000) {
+      function fetchSeguro(url, timeoutMs = 20000) {
         return Promise.race([
           fetch(url, { cache: "no-store" }),
           new Promise((_, r) =>
@@ -231,10 +231,12 @@
             }
           }
         } catch (error) {
-        } finally {
-          // 🚨🚨 OPTIMIZACIÓN 2: RELAJAR CONSULTA A 10 MINUTOS 🚨🚨
-          setTimeout(cargarPlaylist, 600000);
+          // Si el WiFi falló, reintenta en 15 SEGUNDOS
+          setTimeout(cargarPlaylist, 15000);
+          return;
         }
+        // Si todo cargó bien, descansa 10 minutos
+        setTimeout(cargarPlaylist, 600000);
       }
 
       setInterval(() => {

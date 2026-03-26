@@ -67,7 +67,7 @@
       document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
 
       // 5. OBTENCIÓN DE HORA REAL (Múltiples APIs de respaldo)
-      function fetchSeguro(url, timeoutMs = 3000) {
+      function fetchSeguro(url, timeoutMs = 20000) {//20s para que no muera en el intento de obtener la hora
         return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
@@ -172,16 +172,15 @@
             }
           }
         } catch (error) {
-        } finally {
-          
-          // 🚨🚨 OPTIMIZACIÓN VITAL 2: RELAJAR LA CONSULTA A 10 MINUTOS 🚨🚨
-          // ANTES DECÍA: setTimeout(cargarPlaylist, 30000); (Se ejecutaba cada 30 segundos)
-          // Esto generaba miles de peticiones al servidor al día, atragantando el procesador de la TV.
-          // AHORA: 600,000 milisegundos = 10 minutos. La TV descansa y el servidor no se satura.
-          setTimeout(cargarPlaylist, 600000); 
-          
-        }
-      }
+          // Si el WiFi falló o está super lento, reintenta en 15 SEGUNDOS, no en 10 minutos.
+    setTimeout(cargarPlaylist, 15000); 
+    return;
+    }
+  // Si todo cargó bien y el video ya está sonando, entonces sí, descansa 10 minutos.
+  setTimeout(cargarPlaylist, 600000);
+   }
+        
+      
 
       // Fuerza la reproducción si se detiene accidentalmente
       setInterval(() => { if (videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000);
