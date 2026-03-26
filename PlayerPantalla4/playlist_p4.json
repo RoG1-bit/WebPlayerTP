@@ -7,7 +7,8 @@
     "valledulce": "independiente_valledulce",
     "zarzamora": "independiente_zarzamora",
     "lasramblas": "independiente_lasramblas",
-    "bambu": "independiente_bambu"
+    "bambu": "independiente_bambu",
+    "laskina": "independiente_laskina"
   },
   "perfiles": {
     "independiente_chiltiupan": [
@@ -34,6 +35,11 @@
       { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_manana_bambu.mp4" },
       { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_almuerzo_bambu.mp4" },
       { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_tarde_bambu.mp4" }
+    ],
+    "independiente_laskina": [
+      { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_manana_laskina.mp4" },
+      { "inicio": "10:30", "fin": "13:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_almuerzo_laskina.mp4" },
+      { "inicio": "14:00", "fin": "23:59", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_tarde_laskina.mp4" }
     ],
     "default": [
       { "inicio": "00:00", "fin": "10:29", "url": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla4/p4_manana_default.mp4" },

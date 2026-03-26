@@ -50,24 +50,33 @@
         return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
-      // --- MOTOR DE HORA EXACTA ---
+      // --- MOTOR DE HORA EXACTA (Alineado con P3 para máxima estabilidad) ---
       async function obtenerFechaReal() {
+        const dias = { Sunday: 7, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
         try {
-          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador");
-          if (res1.ok) { const data = await res1.json(); return { getHours: () => data.hour, getMinutes: () => data.minute }; } throw new Error("API 1");
+          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 20000);
+          if (res1.ok) { 
+            const data = await res1.json(); 
+            return { getHours: () => data.hour, getMinutes: () => data.minute, getDay: () => dias[data.dayOfWeek] }; 
+          } 
+          throw new Error("API 1 falló");
         } catch (error1) {
           try {
-            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador");
-            if (res2.ok) { const data2 = await res2.json(); const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000);
-              return { getHours: () => svTime.getUTCHours(), getMinutes: () => svTime.getUTCMinutes() };
-            } throw new Error("API 2");
+            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador", 20000);
+            if (res2.ok) { 
+              const data2 = await res2.json(); 
+              const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000); 
+              return { getHours: () => svTime.getUTCHours(), getMinutes: () => svTime.getUTCMinutes(), getDay: () => svTime.getUTCDay() === 0 ? 7 : svTime.getUTCDay() }; 
+            } 
+            throw new Error("API 2 falló");
           } catch (error2) {
-            const localDate = new Date(); return { getHours: () => localDate.getHours(), getMinutes: () => localDate.getMinutes() };
+            const localDate = new Date(); 
+            return { getHours: () => localDate.getHours(), getMinutes: () => localDate.getMinutes(), getDay: () => localDate.getDay() === 0 ? 7 : localDate.getDay() };
           }
         }
       }
 
-      // --- CEREBRO DE REPRODUCCIÓN (Ahora con Horarios) ---
+      // --- CEREBRO DE REPRODUCCIÓN ---
       async function cargarPlaylist() {
         try {
           if (!navigator.onLine) throw new Error("Offline");
