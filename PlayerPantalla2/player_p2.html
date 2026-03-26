@@ -213,7 +213,7 @@
           let videoEncontrado = "";
 
           // LÓGICA DE EXCEPCIONES PARA PANTALLA 2
-          if (horaActual >= "00:00" && horaActual <= "10:29") {
+          if (horaActual >= "00:00" && horaActual <= "10:59") {
             if (
               data.excepciones_manana &&
               data.excepciones_manana[sucursalActual] &&
@@ -223,7 +223,7 @@
             } else {
               videoEncontrado = data.fijos.manana;
             }
-          } else if (horaActual >= "10:30" && horaActual <= "13:59") {
+          } else if (horaActual >= "10:59" && horaActual <= "13:59") {
             let almuerzoHoy =
               tipoSemana === "S1"
                 ? data.almuerzos_s1[dia]
