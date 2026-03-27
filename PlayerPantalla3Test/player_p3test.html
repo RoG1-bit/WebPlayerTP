@@ -3,246 +3,159 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla-1-Staging</title>
+    <title>Pantalla-3-Staging</title>
     <style>
-      body,
-      html {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: #1a1a1a;
+      body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a;
         background-image: url("https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/fondo.jpg");
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: contain;
+        background-position: center; background-repeat: no-repeat; background-size: contain;
       }
-      video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        position: absolute;
-        z-index: 5;
-      }
+      video { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 5; background-color: transparent; }
     </style>
   </head>
   <body>
     <video id="videoPlayer" muted playsinline loop preload="auto"></video>
 
     <script>
-      const URL_PLAYLIST =
-        "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/playlist_p3test.json";
+      const URL_PLAYLIST = "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3test/playlist_p3.json";
       const videoElement = document.getElementById("videoPlayer");
 
-      // --- IDENTIDAD DE LA SUCURSAL ---
+      // --- IDENTIDAD ---
       const urlParams = new URLSearchParams(window.location.search);
-      const sucursalActual = urlParams.get("sucursal")
-        ? urlParams.get("sucursal").toLowerCase()
-        : "default";
+      const sucursalActual = urlParams.get("sucursal") ? urlParams.get("sucursal").toLowerCase() : "default";
 
-      let currentUrl = "";
-      let ultimaModificacion = "";
+      let currentUrl = ""; 
       let intentandoReproducir = false;
 
       function intentarReproducir() {
-        if (intentandoReproducir) return;
+        if (intentandoReproducir) return; 
         intentandoReproducir = true;
-        videoElement
-          .play()
-          .then(() => {
-            intentandoReproducir = false;
-          })
-          .catch(() => {
-            intentandoReproducir = false;
-          });
+        videoElement.play().then(() => { intentandoReproducir = false; }).catch(() => { intentandoReproducir = false; });
       }
 
-      function lavarRAM() {
-        videoElement.pause();
-        videoElement.removeAttribute("src");
-        videoElement.load();
-        currentUrl = "";
-
-        if (navigator.onLine) {
-          setTimeout(() => {
-            const params = new URLSearchParams(window.location.search);
-            params.set("r", new Date().getTime());
-            window.location.replace(
-              window.location.origin +
-                window.location.pathname +
-                "?" +
-                params.toString(),
-            );
-          }, 500);
-        }
-      }
-
-      setInterval(lavarRAM, 2700000);
-
+      // --- EL SALVAVIDAS ANTI-CONGELAMIENTO DE WEBOS ---
       videoElement.addEventListener("error", () => {
-        setTimeout(lavarRAM, 3000);
+        // Si el internet falló y el video se rompió, NO recargamos la página entera.
+        // Esperamos 30 segundos para que el router respire, e intentamos forzar solo el video.
+        setTimeout(() => {
+          if (currentUrl && navigator.onLine) {
+            // Le agregamos un sello temporal de emergencia para evadir el caché corrupto del error
+            videoElement.src = currentUrl + "?rescate=" + new Date().getTime();
+            videoElement.load();
+            intentarReproducir();
+          }
+        }, 30000);
       });
+
       videoElement.addEventListener("stalled", () => {
-        videoElement.load();
+        videoElement.load(); 
         intentarReproducir();
       });
-      document.addEventListener(
-        "click",
-        async () => {
-          try {
-            if ("wakeLock" in navigator)
-              await navigator.wakeLock.request("screen");
-          } catch (e) {}
-        },
-        { once: true },
-      );
+
+      document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
 
       function fetchSeguro(url, timeoutMs = 20000) {
-        return Promise.race([
-          fetch(url, { cache: "no-store" }),
-          new Promise((_, r) =>
-            setTimeout(() => r(new Error("Timeout")), timeoutMs),
-          ),
-        ]);
+        return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
+      // --- HORA EXACTA ---
       async function obtenerFechaReal() {
+        const dias = { Sunday: 7, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
         try {
-          const res1 = await fetchSeguro(
-            "https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador",
-          );
-          if (res1.ok) {
-            const data = await res1.json();
-            return { getHours: () => data.hour, getMinutes: () => data.minute };
-          }
-          throw new Error("API 1 falló");
+          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 20000);
+          if (res1.ok) { const data = await res1.json(); return { getHours: () => data.hour, getMinutes: () => data.minute, getDay: () => dias[data.dayOfWeek] }; } 
+          throw new Error("API1");
         } catch (error1) {
           try {
-            const res2 = await fetchSeguro(
-              "https://worldtimeapi.org/api/timezone/America/El_Salvador",
-            );
-            if (res2.ok) {
-              const data2 = await res2.json();
-              const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000);
-              return {
-                getHours: () => svTime.getUTCHours(),
-                getMinutes: () => svTime.getUTCMinutes(),
-              };
-            }
-            throw new Error("API 2 falló");
+            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador", 20000);
+            if (res2.ok) { const data2 = await res2.json(); const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000); return { getHours: () => svTime.getUTCHours(), getMinutes: () => svTime.getUTCMinutes(), getDay: () => svTime.getUTCDay() === 0 ? 7 : svTime.getUTCDay() }; } 
+            throw new Error("API2");
           } catch (error2) {
-            const localDate = new Date();
-            return {
-              getHours: () => localDate.getHours(),
-              getMinutes: () => localDate.getMinutes(),
-            };
+            const localDate = new Date(); return { getHours: () => localDate.getHours(), getMinutes: () => localDate.getMinutes(), getDay: () => localDate.getDay() === 0 ? 7 : localDate.getDay() };
           }
         }
       }
 
+      // --- CEREBRO MODO TANQUE ---
       async function cargarPlaylist() {
         try {
           if (!navigator.onLine) throw new Error("Offline");
 
-          const response = await fetch(
-            URL_PLAYLIST + "?t=" + new Date().getTime(),
-            { cache: "no-store" },
-          );
-          if (!response.ok) return;
-          let data;
-          try {
-            data = await response.json();
-          } catch (e) {
-            return;
-          }
+          // Descargamos el JSON (esto pesa kilobytes, gasta 0 recursos)
+          const response = await fetch(URL_PLAYLIST + "?t=" + new Date().getTime(), { cache: "no-store" });
+          if (!response.ok) return; 
+          let data; try { data = await response.json(); } catch (e) { return; }
 
           const ahora = await obtenerFechaReal();
-          const horaActual =
-            String(ahora.getHours()).padStart(2, "0") +
-            ":" +
-            String(ahora.getMinutes()).padStart(2, "0");
-
+          const horaActual = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
           let videoEncontrado = "";
 
-          // CASCADA NIVEL 1: ¿Hay una excepción temporal para esta sucursal hoy?
-          if (
-            data.excepciones_temporales &&
-            data.excepciones_temporales[sucursalActual]
-          ) {
+          // CASCADA 1: Excepciones temporales
+          if (data.excepciones_temporales && data.excepciones_temporales[sucursalActual]) {
             for (let turno of data.excepciones_temporales[sucursalActual]) {
-              if (horaActual >= turno.inicio && horaActual <= turno.fin) {
-                videoEncontrado = turno.url;
-                break;
-              }
+              if (horaActual >= turno.inicio && horaActual <= turno.fin) { videoEncontrado = turno.url; break; }
             }
           }
 
-          // CASCADA NIVEL 2: Si no hay excepción, buscar el Perfil Asignado
+          // CASCADA 1.5: Buffet Fin de Semana
           if (!videoEncontrado) {
-            // Descubre a qué perfil pertenece esta sucursal (o usa 'default' si no está en la lista)
-            let miPerfil =
-              data.asignacion_perfiles &&
-              data.asignacion_perfiles[sucursalActual]
-                ? data.asignacion_perfiles[sucursalActual]
-                : "default";
-
-            // Busca los horarios de ese perfil
-            let horariosPerfil =
-              data.perfiles[miPerfil] || data.perfiles["default"];
-
-            for (let turno of horariosPerfil) {
-              if (horaActual >= turno.inicio && horaActual <= turno.fin) {
-                videoEncontrado = turno.url;
-                break;
+            let dia = ahora.getDay();
+            if (data.excepciones_dias && data.excepciones_dias[sucursalActual] && data.excepciones_dias[sucursalActual][dia]) {
+              for (let turno of data.excepciones_dias[sucursalActual][dia]) {
+                if (horaActual >= turno.inicio && horaActual <= turno.fin) { videoEncontrado = turno.url; break; }
               }
             }
           }
 
-          // REPRODUCCIÓN Y ANTI-CACHÉ
+          // CASCADA 2: Perfiles base
+          if (!videoEncontrado) {
+            let miPerfil = data.asignacion_perfiles && data.asignacion_perfiles[sucursalActual] ? data.asignacion_perfiles[sucursalActual] : "default";
+            let horariosPerfil = data.perfiles[miPerfil] || data.perfiles["default"];
+            for (let turno of horariosPerfil) {
+              if (horaActual >= turno.inicio && horaActual <= turno.fin) { videoEncontrado = turno.url; break; }
+            }
+          }
+
+          // REPRODUCCIÓN - LA MAGIA DE LA ESTABILIDAD
           if (videoEncontrado) {
-            if (currentUrl === "") {
+            // Si es la primera vez que arranca, o si el video cambia (ej. pasó a la tarde)
+            if (currentUrl !== videoEncontrado) {
               currentUrl = videoEncontrado;
               
-              // 🚨🚨 OPTIMIZACIÓN 1: URL LIMPIA SIN CACHÉ BUSTING 🚨🚨
+              videoElement.pause();
+              videoElement.removeAttribute("src");
+              videoElement.load();
+
+              // Usamos la URL LIMPIA. La TV la descargará 1 vez y la guardará en caché nativo.
               videoElement.src = currentUrl; 
-              
               videoElement.load();
               intentarReproducir();
-            } else if (videoEncontrado !== currentUrl) {
-              lavarRAM();
-            } else {
-              try {
-                const resHead = await fetch(
-                  currentUrl + "?check=" + new Date().getTime(),
-                  { method: "HEAD", cache: "no-store" },
-                );
-                if (resHead.ok) {
-                  const modificado = resHead.headers.get("Last-Modified");
-                  if (modificado) {
-                    if (!ultimaModificacion) {
-                      ultimaModificacion = modificado;
-                    } else if (ultimaModificacion !== modificado) {
-                      lavarRAM();
-                    }
-                  }
-                }
-              } catch (e) {}
             }
+            // SI EL VIDEO ES EL MISMO: NO HACEMOS NADA. 
+            // La TV seguirá reproduciendo en loop desde su memoria sin usar Internet.
           }
+
         } catch (error) {
-          // Si el WiFi falló, reintenta en 15 SEGUNDOS
-          setTimeout(cargarPlaylist, 15000);
+          // Si el WiFi está caído al revisar la hora, vuelve a intentar en 1 MINUTO (silenciosamente)
+          setTimeout(cargarPlaylist, 60000);
           return;
         }
-        // Si todo cargó bien, descansa 10 minutos
-        setTimeout(cargarPlaylist, 600000);
+
+        // Revisamos tranquilamente cada 5 MINUTOS si ya toca cambiar de turno (Casi 0 gasto de Cloudflare)
+        setTimeout(cargarPlaylist, 300000);
       }
 
+      // Evita que la TV se duerma
+      setInterval(() => { if (videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000);
+      
+      // Reinicio maestro cada 4 horas (Limpieza profunda de RAM)
       setInterval(() => {
-        if (videoElement.paused && videoElement.src && navigator.onLine)
-          intentarReproducir();
-      }, 5000);
+        if (navigator.onLine) {
+          const params = new URLSearchParams(window.location.search); params.set("r", new Date().getTime());
+          window.location.replace(window.location.origin + window.location.pathname + "?" + params.toString());
+        }
+      }, 14400000);
+
+      // Arranque inicial
       cargarPlaylist();
     </script>
   </body>
