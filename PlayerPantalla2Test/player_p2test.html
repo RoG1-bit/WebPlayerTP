@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla-2-Staging</title>
+    <title>Pantalla 2test</title>
     <style>
+      /* Fondo corporativo de respaldo */
       body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a;
         background-image: url("https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/fondo.jpg");
         background-position: center; background-repeat: no-repeat; background-size: contain;
       }
+      /* Reproductor de video */
       video { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 5; background-color: transparent; }
     </style>
   </head>
@@ -16,21 +18,29 @@
     <video id="videoPlayer" muted playsinline loop preload="auto"></video>
 
     <script>
-      const URL_PLAYLIST = "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla2test/playlist_p2.json";
+      // ==========================================
+      // 1. CONFIGURACIÓN DEL SISTEMA
+      // ==========================================
+      const URL_PLAYLIST = "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla2/playlist_p2.json";
       const videoElement = document.getElementById("videoPlayer");
 
+      // Identificador de sucursal
       const urlParams = new URLSearchParams(window.location.search);
       const sucursalActual = urlParams.get("sucursal") ? urlParams.get("sucursal").toLowerCase() : "general";
 
       let currentUrl = "";
       let intentandoReproducir = false;
 
+      // ==========================================
+      // 2. NÚCLEO DE PROTECCIÓN Y REPRODUCCIÓN
+      // ==========================================
       function intentarReproducir() {
         if (intentandoReproducir) return;
         intentandoReproducir = true;
         videoElement.play().then(() => { intentandoReproducir = false; }).catch(() => { intentandoReproducir = false; });
       }
 
+      // Reinicio seguro: Limpia la memoria de la TV
       function lavarRAM() {
         videoElement.pause();
         videoElement.removeAttribute("src");
@@ -46,21 +56,9 @@
         }
       }
 
-      // --- EL SALVAVIDAS ANTI-CONGELAMIENTO DE WEBOS ---
-      videoElement.addEventListener("error", () => {
-        setTimeout(() => {
-          if (currentUrl && navigator.onLine) {
-            videoElement.src = currentUrl + "?rescate=" + new Date().getTime();
-            videoElement.load();
-            intentarReproducir();
-          }
-        }, 30000); // 30 segundos de paciencia para reconectar
-      });
-
-      videoElement.addEventListener("stalled", () => {
-        videoElement.load();
-        intentarReproducir();
-      });
+      // Sistema de Auto-Rescate de 15 segundos
+      videoElement.addEventListener("error", () => { setTimeout(lavarRAM, 15000); });
+      videoElement.addEventListener("stalled", () => { videoElement.load(); intentarReproducir(); });
 
       document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
 
@@ -68,7 +66,9 @@
         return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
-      // --- MOTOR DE HORA Y FECHA EXACTA ---
+      // ==========================================
+      // 3. RELOJ MAESTRO Y CÁLCULO DE SEMANAS
+      // ==========================================
       async function obtenerFechaReal() {
         try {
           const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 20000);
@@ -92,7 +92,7 @@
         }
       }
 
-      // --- CÁLCULO DE SEMANAS DEL MENÚ (S1 / S2) ---
+      // Calcula si estamos en la quincena 1 (S1) o quincena 2 (S2)
       function obtenerTipoSemana(ahora) {
         const diaSemana = ahora.getDay();
         const diasParaRestar = diaSemana === 0 ? 6 : diaSemana - 1;
@@ -101,7 +101,9 @@
         return Math.floor((lunesActualUTC - Date.UTC(2026, 1, 9)) / (1000 * 60 * 60 * 24 * 7)) % 2 === 0 ? "S1" : "S2";
       }
 
-      // --- CEREBRO PRINCIPAL ---
+      // ==========================================
+      // 4. CEREBRO DE TOMA DE DECISIONES
+      // ==========================================
       async function cargarPlaylist() {
         try {
           if (!navigator.onLine) throw new Error("Offline");
@@ -117,7 +119,7 @@
           const tipoSemana = obtenerTipoSemana(ahora);
           let videoEncontrado = "";
 
-          // --- REGLAS DE HORARIOS INTACTAS ---
+          // --- MATEMÁTICA DE TURNOS ---
           if (horaActual >= "00:00" && horaActual <= "10:59") {
             if (data.excepciones_manana && data.excepciones_manana[sucursalActual] && data.excepciones_manana[sucursalActual][dia]) {
               videoEncontrado = data.excepciones_manana[sucursalActual][dia];
@@ -131,37 +133,42 @@
             videoEncontrado = data.fijos.tarde;
           }
 
-          // REPRODUCCIÓN - LA MAGIA DE LA ESTABILIDAD
+          // --- MOTOR DE REPRODUCCIÓN (Anti-Bloqueos) ---
           if (videoEncontrado) {
-            if (currentUrl !== videoEncontrado) {
+            
+            if (currentUrl === "") {
+              // Arranque inicial: Sello de tiempo para burlar la lista negra de televisores viejos
               currentUrl = videoEncontrado;
-              
-              videoElement.pause();
-              videoElement.removeAttribute("src");
-              videoElement.load();
-              
-              videoElement.src = currentUrl; 
+              videoElement.src = currentUrl + "?v=" + new Date().getTime(); 
               videoElement.load();
               intentarReproducir();
+            
+            } else if (currentUrl !== videoEncontrado) {
+              // Cambio de turno programado: Reinicio limpio de página
+              lavarRAM();
             }
-            // Si el video es el mismo, no toca nada y reproduce desde la RAM del televisor
+            // Si es el mismo video, recicla desde la memoria local.
           }
+          
         } catch (error) {
-          // Reintento silencioso y espaciado si falla la red
-          setTimeout(cargarPlaylist, 60000);
+          // Reintento silencioso en 15 segundos si el router falló
+          setTimeout(cargarPlaylist, 15000);
           return;
         }
         
-        // Revisa turno cada 5 minutos tranquilamente
-        setTimeout(cargarPlaylist, 300000);
+        // Modo Ahorro Extremo: Chequea turno cada 30 minutos (1,800,000 ms)
+        setTimeout(cargarPlaylist, 1800000);
       }
 
+      // ==========================================
+      // 5. RUTINAS DE MANTENIMIENTO
+      // ==========================================
+      
       setInterval(() => { if (videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000);
       
-      // Reinicio maestro de limpieza de RAM cada 4 horas
+      // Limpieza profunda de RAM cada 4 horas
       setInterval(lavarRAM, 14400000);
 
-      // ARRANQUE DEL SISTEMA
       cargarPlaylist();
     </script>
   </body>

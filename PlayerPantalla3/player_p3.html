@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla-3-Online</title>
+    <title>Pantalla 3 - Producción (Definitiva)</title>
     <style>
+      /* Fondo de seguridad: Muestra el logo corporativo si hay lentitud en la red */
       body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a;
         background-image: url("https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/fondo.jpg");
         background-position: center; background-repeat: no-repeat; background-size: contain;
       }
+      /* Reproductor optimizado para sobreponerse al fondo */
       video { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 5; background-color: transparent; }
     </style>
   </head>
@@ -16,48 +18,58 @@
     <video id="videoPlayer" muted playsinline loop preload="auto"></video>
 
     <script>
+      // ==========================================
+      // 1. CONFIGURACIÓN DEL SISTEMA
+      // ==========================================
       const URL_PLAYLIST = "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla3/playlist_p3.json";
       const videoElement = document.getElementById("videoPlayer");
 
-      // --- IDENTIDAD ---
+      // Identificador de la sucursal actual (leído desde la URL)
       const urlParams = new URLSearchParams(window.location.search);
       const sucursalActual = urlParams.get("sucursal") ? urlParams.get("sucursal").toLowerCase() : "default";
 
       let currentUrl = ""; 
-      let intentandoReproducir = false;
+      let intentandoReproducir = false; 
 
+      // ==========================================
+      // 2. NÚCLEO DE PROTECCIÓN Y REPRODUCCIÓN
+      // ==========================================
       function intentarReproducir() {
         if (intentandoReproducir) return; 
         intentandoReproducir = true;
         videoElement.play().then(() => { intentandoReproducir = false; }).catch(() => { intentandoReproducir = false; });
       }
 
-      // --- EL SALVAVIDAS ANTI-CONGELAMIENTO DE WEBOS ---
-      videoElement.addEventListener("error", () => {
-        // Si el internet falló y el video se rompió, NO recargamos la página entera.
-        // Esperamos 30 segundos para que el router respire, e intentamos forzar solo el video.
-        setTimeout(() => {
-          if (currentUrl && navigator.onLine) {
-            // Le agregamos un sello temporal de emergencia para evadir el caché corrupto del error
-            videoElement.src = currentUrl + "?rescate=" + new Date().getTime();
-            videoElement.load();
-            intentarReproducir();
-          }
-        }, 30000);
-      });
+      // El reinicio seguro: Limpia la memoria de la TV y evita que el procesador colapse
+      function lavarRAM() {
+        videoElement.pause();
+        videoElement.removeAttribute("src");
+        videoElement.load();
+        currentUrl = "";
 
-      videoElement.addEventListener("stalled", () => {
-        videoElement.load(); 
-        intentarReproducir();
-      });
+        if (navigator.onLine) {
+          setTimeout(() => {
+            const params = new URLSearchParams(window.location.search);
+            params.set("r", new Date().getTime());
+            window.location.replace(window.location.origin + window.location.pathname + "?" + params.toString());
+          }, 500);
+        }
+      }
 
+      // Sistema de Auto-Rescate: Si el video o la red fallan, espera 15s y reinicia la página
+      videoElement.addEventListener("error", () => { setTimeout(lavarRAM, 15000); });
+      videoElement.addEventListener("stalled", () => { videoElement.load(); intentarReproducir(); });
+
+      // Otorga permisos de mantener pantalla encendida al primer toque del control
       document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
 
       function fetchSeguro(url, timeoutMs = 20000) {
         return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
-      // --- HORA EXACTA ---
+      // ==========================================
+      // 3. RELOJ MAESTRO (Redundancia Triple)
+      // ==========================================
       async function obtenerFechaReal() {
         const dias = { Sunday: 7, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
         try {
@@ -75,30 +87,31 @@
         }
       }
 
-      // --- CEREBRO MODO TANQUE ---
+      // ==========================================
+      // 4. CEREBRO DE TOMA DE DECISIONES
+      // ==========================================
       async function cargarPlaylist() {
         try {
           if (!navigator.onLine) throw new Error("Offline");
 
-          // Descargamos el JSON (esto pesa kilobytes, gasta 0 recursos)
           const response = await fetch(URL_PLAYLIST + "?t=" + new Date().getTime(), { cache: "no-store" });
           if (!response.ok) return; 
           let data; try { data = await response.json(); } catch (e) { return; }
 
           const ahora = await obtenerFechaReal();
           const horaActual = String(ahora.getHours()).padStart(2, "0") + ":" + String(ahora.getMinutes()).padStart(2, "0");
+          let dia = ahora.getDay();
           let videoEncontrado = "";
 
-          // CASCADA 1: Excepciones temporales
+          // CASCADA 1: Promociones temporales
           if (data.excepciones_temporales && data.excepciones_temporales[sucursalActual]) {
             for (let turno of data.excepciones_temporales[sucursalActual]) {
               if (horaActual >= turno.inicio && horaActual <= turno.fin) { videoEncontrado = turno.url; break; }
             }
           }
-
-          // CASCADA 1.5: Buffet Fin de Semana
+          
+          // CASCADA 2: Buffet de Fines de Semana
           if (!videoEncontrado) {
-            let dia = ahora.getDay();
             if (data.excepciones_dias && data.excepciones_dias[sucursalActual] && data.excepciones_dias[sucursalActual][dia]) {
               for (let turno of data.excepciones_dias[sucursalActual][dia]) {
                 if (horaActual >= turno.inicio && horaActual <= turno.fin) { videoEncontrado = turno.url; break; }
@@ -106,7 +119,7 @@
             }
           }
 
-          // CASCADA 2: Perfiles base
+          // CASCADA 3: Horarios Base (Lunes a Viernes)
           if (!videoEncontrado) {
             let miPerfil = data.asignacion_perfiles && data.asignacion_perfiles[sucursalActual] ? data.asignacion_perfiles[sucursalActual] : "default";
             let horariosPerfil = data.perfiles[miPerfil] || data.perfiles["default"];
@@ -115,47 +128,42 @@
             }
           }
 
-          // REPRODUCCIÓN - LA MAGIA DE LA ESTABILIDAD
+          // --- MOTOR DE REPRODUCCIÓN (Anti-Bloqueos) ---
           if (videoEncontrado) {
-            // Si es la primera vez que arranca, o si el video cambia (ej. pasó a la tarde)
-            if (currentUrl !== videoEncontrado) {
-              currentUrl = videoEncontrado;
-              
-              videoElement.pause();
-              videoElement.removeAttribute("src");
-              videoElement.load();
-
-              // Usamos la URL LIMPIA. La TV la descargará 1 vez y la guardará en caché nativo.
-              videoElement.src = currentUrl; 
+            if (currentUrl === "") {
+              // Arranque inicial: Sello de tiempo para burlar la lista negra de televisores viejos
+              currentUrl = videoEncontrado; 
+              videoElement.src = currentUrl + "?v=" + new Date().getTime(); 
               videoElement.load();
               intentarReproducir();
+            } else if (currentUrl !== videoEncontrado) {
+              // Cambio de turno (ej. Mañana a Almuerzo): Reinicio limpio del equipo
+              lavarRAM(); 
             }
-            // SI EL VIDEO ES EL MISMO: NO HACEMOS NADA. 
-            // La TV seguirá reproduciendo en loop desde su memoria sin usar Internet.
+            // Si el video no ha cambiado, ignora todo y deja que la TV siga consumiendo de su propia RAM
           }
 
         } catch (error) {
-          // Si el WiFi está caído al revisar la hora, vuelve a intentar en 1 MINUTO (silenciosamente)
-          setTimeout(cargarPlaylist, 60000);
+          // Reintento silencioso en 15 segundos si el router falló
+          setTimeout(cargarPlaylist, 15000);
           return;
         }
 
-        // Revisamos tranquilamente cada 5 MINUTOS si ya toca cambiar de turno (Casi 0 gasto de Cloudflare)
-        setTimeout(cargarPlaylist, 300000);
+        // Modo Ahorro: Solo consulta a la nube cada 30 minutos (1,800,000 ms)
+        setTimeout(cargarPlaylist, 1800000);
       }
 
-      // Evita que la TV se duerma
+      // ==========================================
+      // 5. RUTINAS DE MANTENIMIENTO
+      // ==========================================
+      
+      // Auto-reanudación si el video se pausa accidentalmente
       setInterval(() => { if (videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000);
       
-      // Reinicio maestro cada 4 horas (Limpieza profunda de RAM)
-      setInterval(() => {
-        if (navigator.onLine) {
-          const params = new URLSearchParams(window.location.search); params.set("r", new Date().getTime());
-          window.location.replace(window.location.origin + window.location.pathname + "?" + params.toString());
-        }
-      }, 14400000);
+      // Limpieza profunda de memoria cada 4 horas
+      setInterval(lavarRAM, 14400000);
 
-      // Arranque inicial
+      // Arranque del sistema
       cargarPlaylist();
     </script>
   </body>
