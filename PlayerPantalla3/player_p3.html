@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla 3 - Producción (Definitiva)</title>
+    <title>Pantalla 3 - Producción (Watchdog + Universal)</title>
     <style>
       /* Fondo de seguridad: Muestra el logo corporativo si hay lentitud en la red */
       body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a;
@@ -56,9 +56,9 @@
         }
       }
 
-      // Sistema de Auto-Rescate: Si el video o la red fallan, espera 15s y reinicia la página
+      // Sistema de Auto-Rescate Universal (A prueba de Samsung, LG y Android)
       videoElement.addEventListener("error", () => { setTimeout(lavarRAM, 15000); });
-      videoElement.addEventListener("stalled", () => { videoElement.load(); intentarReproducir(); });
+      // Evento 'stalled' eliminado intencionalmente para evitar bucles en Tizen OS.
 
       // Otorga permisos de mantener pantalla encendida al primer toque del control
       document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
@@ -149,12 +149,12 @@
           return;
         }
 
-        // Modo Ahorro: Solo consulta a la nube cada  5 minutos 
+        // Modo Ahorro: Solo consulta a la nube cada 5 minutos 
         setTimeout(cargarPlaylist, 300000);
       }
 
       // ==========================================
-      // 5. RUTINAS DE MANTENIMIENTO
+      // 5. RUTINAS DE MANTENIMIENTO Y WATCHDOG
       // ==========================================
       
       // Auto-reanudación si el video se pausa accidentalmente
@@ -162,6 +162,29 @@
       
       // Limpieza profunda de memoria cada 4 horas
       setInterval(lavarRAM, 14400000);
+
+      // --- EL PERRO GUARDIÁN (Watchdog Anti-Congelamiento) ---
+      let ultimoTiempoVideo = -1;
+      let alertasCongelamiento = 0;
+
+      setInterval(() => {
+        if (currentUrl !== "" && !videoElement.paused) {
+          let tiempoActual = videoElement.currentTime;
+
+          if (tiempoActual === ultimoTiempoVideo) {
+            alertasCongelamiento++;
+            if (alertasCongelamiento === 1) {
+              videoElement.load();
+              intentarReproducir();
+            } else if (alertasCongelamiento >= 2) {
+              lavarRAM();
+            }
+          } else {
+            alertasCongelamiento = 0;
+          }
+          ultimoTiempoVideo = tiempoActual;
+        }
+      }, 20000);
 
       // Arranque del sistema
       cargarPlaylist();

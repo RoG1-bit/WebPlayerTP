@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla 2 - Producción (Definitiva)</title>
+    <title>Pantalla 2 - Producción (Watchdog + Universal)</title>
     <style>
       /* Fondo corporativo de respaldo */
       body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a;
@@ -56,9 +56,9 @@
         }
       }
 
-      // Sistema de Auto-Rescate de 15 segundos
+      // Sistema de Auto-Rescate Universal (A prueba de Samsung, LG y Android)
       videoElement.addEventListener("error", () => { setTimeout(lavarRAM, 15000); });
-      videoElement.addEventListener("stalled", () => { videoElement.load(); intentarReproducir(); });
+      // Evento 'stalled' eliminado intencionalmente para evitar bucles en Tizen OS.
 
       document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
 
@@ -126,7 +126,7 @@
             } else {
               videoEncontrado = data.fijos.manana;
             }
-          } else if (horaActual >= "10:59" && horaActual <= "13:59") {
+          } else if (horaActual >= "11:00" && horaActual <= "13:59") {
             let almuerzoHoy = tipoSemana === "S1" ? data.almuerzos_s1[dia] : data.almuerzos_s2[dia];
             videoEncontrado = almuerzoHoy ? almuerzoHoy : data.fijos.manana;
           } else if (horaActual >= "14:00" && horaActual <= "23:59") {
@@ -156,18 +156,41 @@
           return;
         }
         
-        // Modo Ahorro Extremo: Chequea turno cada 5 minutos (1,800,000 ms)
+        // Modo Precisión: Chequea turno cada 5 minutos (300,000 ms)
         setTimeout(cargarPlaylist, 300000);
       }
 
       // ==========================================
-      // 5. RUTINAS DE MANTENIMIENTO
+      // 5. RUTINAS DE MANTENIMIENTO Y WATCHDOG
       // ==========================================
       
       setInterval(() => { if (videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000);
       
       // Limpieza profunda de RAM cada 4 horas
       setInterval(lavarRAM, 14400000);
+
+      // --- EL PERRO GUARDIÁN (Watchdog Anti-Congelamiento) ---
+      let ultimoTiempoVideo = -1;
+      let alertasCongelamiento = 0;
+
+      setInterval(() => {
+        if (currentUrl !== "" && !videoElement.paused) {
+          let tiempoActual = videoElement.currentTime;
+
+          if (tiempoActual === ultimoTiempoVideo) {
+            alertasCongelamiento++;
+            if (alertasCongelamiento === 1) {
+              videoElement.load();
+              intentarReproducir();
+            } else if (alertasCongelamiento >= 2) {
+              lavarRAM();
+            }
+          } else {
+            alertasCongelamiento = 0;
+          }
+          ultimoTiempoVideo = tiempoActual;
+        }
+      }, 20000);
 
       cargarPlaylist();
     </script>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla 4 - Producción (Definitiva)</title>
+    <title>Pantalla 4 - Producción (Watchdog + Universal)</title>
     <style>
       /* Fondo corporativo de seguridad anti-pantallas negras */
       body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a;
@@ -54,10 +54,9 @@
         }
       }
 
-      // --- SISTEMA DE AUTO-RESCATE ---
-      // Si el internet parpadea y el video se rompe, se reinicia solo en 15 segundos
+      // --- SISTEMA DE AUTO-RESCATE UNIVERSAL ---
       videoElement.addEventListener("error", () => { setTimeout(lavarRAM, 15000); });
-      videoElement.addEventListener("stalled", () => { videoElement.load(); intentarReproducir(); });
+      // Evento 'stalled' eliminado intencionalmente para evitar bucles en Tizen OS.
       
       document.addEventListener("click", async () => { try { if ("wakeLock" in navigator) await navigator.wakeLock.request("screen"); } catch (e) {} }, { once: true });
 
@@ -147,13 +146,36 @@
       }
 
       // ==========================================
-      // 5. RUTINAS DE MANTENIMIENTO
+      // 5. RUTINAS DE MANTENIMIENTO Y WATCHDOG
       // ==========================================
 
       setInterval(() => { if (videoElement.paused && videoElement.src && navigator.onLine) intentarReproducir(); }, 5000);
       
       // Reinicio maestro cada 4 horas
       setInterval(lavarRAM, 14400000);
+
+      // --- EL PERRO GUARDIÁN (Watchdog Anti-Congelamiento) ---
+      let ultimoTiempoVideo = -1;
+      let alertasCongelamiento = 0;
+
+      setInterval(() => {
+        if (currentUrl !== "" && !videoElement.paused) {
+          let tiempoActual = videoElement.currentTime;
+
+          if (tiempoActual === ultimoTiempoVideo) {
+            alertasCongelamiento++;
+            if (alertasCongelamiento === 1) {
+              videoElement.load();
+              intentarReproducir();
+            } else if (alertasCongelamiento >= 2) {
+              lavarRAM();
+            }
+          } else {
+            alertasCongelamiento = 0;
+          }
+          ultimoTiempoVideo = tiempoActual;
+        }
+      }, 20000);
 
       cargarPlaylist();
     </script>
