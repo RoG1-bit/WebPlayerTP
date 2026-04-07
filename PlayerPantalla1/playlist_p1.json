@@ -4,6 +4,9 @@
     "manana": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1/p1_manana.mp4",
     "tarde": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1/p1_tarde.mp4"
   },
+  "desayuno_exclusivo": {
+    "zacatecoluca": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1/p1_manana_zacatecoluca.mp4"
+  },
   "excepciones_manana": {
     "zacatecoluca": {
       "6": "https://pub-29979a9319a64459816c0aa2b9d4d11c.r2.dev/pantalla1/p1_buffet_completo.mp4",

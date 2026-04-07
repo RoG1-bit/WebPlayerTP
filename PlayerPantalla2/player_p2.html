@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pantalla 2 - Producción (Watchdog + Universal)</title>
+    <title>Pantalla 2 - Producción (Desayuno Exclusivo + Watchdog)</title>
     <style>
       /* Fondo corporativo de respaldo */
       body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a;
@@ -121,9 +121,16 @@
 
           // --- MATEMÁTICA DE TURNOS ---
           if (horaActual >= "00:00" && horaActual <= "10:59") {
+            // 1. Prioridad Alta: Excepciones de fin de semana (Buffet)
             if (data.excepciones_manana && data.excepciones_manana[sucursalActual] && data.excepciones_manana[sucursalActual][dia]) {
               videoEncontrado = data.excepciones_manana[sucursalActual][dia];
-            } else {
+            } 
+            // 2. Prioridad Media: Desayunos Exclusivos
+            else if (data.desayuno_exclusivo && data.desayuno_exclusivo[sucursalActual]) {
+              videoEncontrado = data.desayuno_exclusivo[sucursalActual];
+            }
+            // 3. Prioridad Baja: Desayuno Nacional
+            else {
               videoEncontrado = data.fijos.manana;
             }
           } else if (horaActual >= "11:00" && horaActual <= "13:59") {
@@ -177,7 +184,8 @@
         if (currentUrl !== "" && !videoElement.paused) {
           let tiempoActual = videoElement.currentTime;
 
-          if (tiempoActual === ultimoTiempoVideo) {
+          // Tolerancia para TV LG
+          if (tiempoActual === ultimoTiempoVideo && tiempoActual > 0) {
             alertasCongelamiento++;
             if (alertasCongelamiento === 1) {
               videoElement.load();
