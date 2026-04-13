@@ -65,31 +65,66 @@
         return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
-      // ==========================================
+     // ==========================================
       // 3. RELOJ MAESTRO Y CÁLCULO DE SEMANAS
       // ==========================================
+      
+      let offsetReloj = null; // Memoria para guardar el atraso de la TV
+
       async function obtenerFechaReal() {
+        const horaTV_UTC = new Date().getTime();
+
         try {
-          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 20000);
+          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 10000);
           if (res1.ok) {
             const data = await res1.json();
-            const dias = { Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
-            return { getFullYear: () => data.year, getMonth: () => data.month - 1, getDate: () => data.day, getDay: () => dias[data.dayOfWeek], getHours: () => data.hour, getMinutes: () => data.minute };
+            // Calculamos el tiempo real y guardamos la diferencia con la TV
+            const realUTC = Date.UTC(data.year, data.month - 1, data.day, data.hour, data.minute, data.seconds) + (6 * 3600000);
+            offsetReloj = realUTC - horaTV_UTC;
+            return formatSVTime(realUTC);
           } throw new Error("API 1");
         } catch (error1) {
           try {
-            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador", 20000);
+            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador", 10000);
             if (res2.ok) {
               const data2 = await res2.json();
-              const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000);
-              return { getFullYear: () => svTime.getUTCFullYear(), getMonth: () => svTime.getUTCMonth(), getDate: () => svTime.getUTCDate(), getDay: () => svTime.getUTCDay(), getHours: () => svTime.getUTCHours(), getMinutes: () => svTime.getUTCMinutes() };
+              const realUTC = data2.unixtime * 1000;
+              offsetReloj = realUTC - horaTV_UTC;
+              return formatSVTime(realUTC);
             } throw new Error("API 2");
           } catch (error2) {
-            const localDate = new Date();
-            return { getFullYear: () => localDate.getFullYear(), getMonth: () => localDate.getMonth(), getDate: () => localDate.getDate(), getDay: () => localDate.getDay(), getHours: () => localDate.getHours(), getMinutes: () => localDate.getMinutes() };
+            // ====================================================
+            // SOLUCIÓN B: EL RASTREADOR DE DESFASE
+            // ====================================================
+            // Tomamos la hora mentirosa de la TV y le sumamos los minutos de error que descubrimos antes.
+            const currentRealUTC = horaTV_UTC + (offsetReloj || 0);
+            return formatSVTime(currentRealUTC);
           }
         }
       }
+
+      function formatSVTime(utcEpoch) {
+        // Convertimos cualquier tiempo a GMT-6 exacto, sin importar la TV
+        const d = new Date(utcEpoch - (6 * 3600000));
+        return {
+          getFullYear: () => d.getUTCFullYear(),
+          getMonth: () => d.getUTCMonth(),
+          getDate: () => d.getUTCDate(),
+          getDay: () => d.getUTCDay(),
+          getHours: () => d.getUTCHours(),
+          getMinutes: () => d.getUTCMinutes()
+        };
+      }
+
+      // Calcula automáticamente si estamos en la Quincena 1 (S1) o Quincena 2 (S2)
+      function obtenerTipoSemana(ahora) {
+        const diaSemana = ahora.getDay();
+        const diasParaRestar = diaSemana === 0 ? 6 : diaSemana - 1;
+        const hoyUTC = Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+        const lunesActualUTC = hoyUTC - diasParaRestar * 24 * 60 * 60 * 1000;
+        return Math.floor((lunesActualUTC - Date.UTC(2026, 1, 9)) / (1000 * 60 * 60 * 24 * 7)) % 2 === 0 ? "S1" : "S2";
+      }
+
 
       // Calcula automáticamente si estamos en la Quincena 1 (S1) o Quincena 2 (S2)
       function obtenerTipoSemana(ahora) {

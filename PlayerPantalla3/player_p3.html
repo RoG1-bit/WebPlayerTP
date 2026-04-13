@@ -67,24 +67,60 @@
         return Promise.race([ fetch(url, { cache: "no-store" }), new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), timeoutMs)) ]);
       }
 
+// ==========================================
+      // 3. RELOJ MAESTRO (Redundancia Triple + Offset)
       // ==========================================
-      // 3. RELOJ MAESTRO (Redundancia Triple)
-      // ==========================================
+      
+      let offsetReloj = null; // Memoria para guardar el atraso/adelanto de la TV
+
       async function obtenerFechaReal() {
-        const dias = { Sunday: 7, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
+        const horaTV_UTC = new Date().getTime();
+
         try {
-          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 20000);
-          if (res1.ok) { const data = await res1.json(); return { getHours: () => data.hour, getMinutes: () => data.minute, getDay: () => dias[data.dayOfWeek] }; } 
+          // Intento 1: timeapi (Timeout a 10s para reaccionar rápido)
+          const res1 = await fetchSeguro("https://timeapi.io/api/Time/current/zone?timeZone=America/El_Salvador", 10000);
+          if (res1.ok) { 
+            const data = await res1.json(); 
+            // Calculamos la hora real universal
+            const realUTC = Date.UTC(data.year, data.month - 1, data.day, data.hour, data.minute, data.seconds) + (6 * 3600000);
+            offsetReloj = realUTC - horaTV_UTC; // Guardamos el error de la TV
+            return formatSVTimeP3(realUTC);
+          } 
           throw new Error("API1");
         } catch (error1) {
           try {
-            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador", 20000);
-            if (res2.ok) { const data2 = await res2.json(); const svTime = new Date(data2.unixtime * 1000 - 6 * 3600000); return { getHours: () => svTime.getUTCHours(), getMinutes: () => svTime.getUTCMinutes(), getDay: () => svTime.getUTCDay() === 0 ? 7 : svTime.getUTCDay() }; } 
+            // Intento 2: worldtimeapi
+            const res2 = await fetchSeguro("https://worldtimeapi.org/api/timezone/America/El_Salvador", 10000);
+            if (res2.ok) { 
+              const data2 = await res2.json(); 
+              const realUTC = data2.unixtime * 1000;
+              offsetReloj = realUTC - horaTV_UTC; // Guardamos el error de la TV
+              return formatSVTimeP3(realUTC);
+            } 
             throw new Error("API2");
           } catch (error2) {
-            const localDate = new Date(); return { getHours: () => localDate.getHours(), getMinutes: () => localDate.getMinutes(), getDay: () => localDate.getDay() === 0 ? 7 : localDate.getDay() };
+            // ====================================================
+            // INTENTO 3: RASTREADOR DE DESFASE
+            // ====================================================
+            // Si no hay internet, agarra la hora de la TV y le suma el error guardado.
+            const currentRealUTC = horaTV_UTC + (offsetReloj || 0);
+            return formatSVTimeP3(currentRealUTC);
           }
         }
+      }
+
+      // Convertidor especial para Pantalla 3
+      function formatSVTimeP3(utcEpoch) {
+        // Restamos 6 horas para llegar a El Salvador
+        const svTime = new Date(utcEpoch - (6 * 3600000));
+        let dia = svTime.getUTCDay();
+        if (dia === 0) dia = 7; // Regla especial: Domingo es 7
+        
+        return { 
+          getHours: () => svTime.getUTCHours(), 
+          getMinutes: () => svTime.getUTCMinutes(), 
+          getDay: () => dia 
+        };
       }
 
       // ==========================================
